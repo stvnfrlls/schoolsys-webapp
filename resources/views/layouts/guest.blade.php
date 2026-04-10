@@ -52,7 +52,7 @@
                         Dashboard
                     </a>
                     @else
-                    <a href="#"
+                    <a href="{{ route('login') }}"
                         class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                         Sign in
                     </a>

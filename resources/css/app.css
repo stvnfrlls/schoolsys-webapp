@@ -1,24 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-@import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-serif: 'Merriweather', Georgia, serif;
+@layer base {
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        @apply text-slate-700 bg-slate-50;
+    }
 
-    --color-school-50: #eff6ff;
-    --color-school-100: #dbeafe;
-    --color-school-200: #bfdbfe;
-    --color-school-300: #93c5fd;
-    --color-school-400: #60a5fa;
-    --color-school-500: #3b82f6;
-    --color-school-600: #1d4ed8;
-    --color-school-700: #1e40af;
-    --color-school-800: #1e3a8a;
-    --color-school-900: #172554;
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-family: 'Merriweather', serif;
+        @apply text-slate-900;
+    }
 }
