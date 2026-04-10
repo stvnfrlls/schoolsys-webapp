@@ -7,4 +7,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-require __DIR__.'/auth.php';
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', fn() => view('dashboard'))
+        ->middleware('verified')
+        ->name('dashboard');
+});
+
+require __DIR__ . '/auth.php';
