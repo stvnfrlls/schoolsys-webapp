@@ -100,7 +100,7 @@ return [
         'items' => [
             [
                 'label' => 'Users',
-                'route' => '#',
+                'route' => 'users.index',
                 'permission' => 'view users',
                 'child' => true,
             ],
