@@ -106,7 +106,7 @@ return [
             ],
             [
                 'label' => 'Roles',
-                'route' => '#',
+                'route' => 'roles.index',
                 'permission' => 'view roles',
                 'child' => true,
             ],
