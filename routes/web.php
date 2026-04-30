@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\PermissionController;
 use App\Http\Controllers\User\RoleController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::put('users/{user}/password', [UserController::class, 'updatePassword'])
         ->name('users.update-password');
     Route::resource('roles', RoleController::class);
+    Route::resource('permissions', PermissionController::class);
 });
 
 require __DIR__ . '/auth.php';

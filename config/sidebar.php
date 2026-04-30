@@ -112,7 +112,7 @@ return [
             ],
             [
                 'label' => 'Permissions',
-                'route' => '#',
+                'route' => 'permissions.index',
                 'permission' => 'view permissions',
                 'child' => true,
             ],
