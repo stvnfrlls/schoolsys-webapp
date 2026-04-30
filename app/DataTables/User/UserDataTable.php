@@ -43,11 +43,11 @@ class UserDataTable extends DataTable
                 'action',
                 fn(User $user) =>
                 view('components.actions', [
-                    'canView' => true,
-                    'canEdit' => true,
-                    'canDelete' => true,
+                    'canView'      => true,
+                    'canEdit'      => true,
+                    'canDelete'    => true,
                     'routeKeyName' => 'users.',
-                    'param' => $user
+                    'param'        => $user
                 ])->render()
             )
             ->rawColumns(['status', 'action'])
@@ -73,22 +73,28 @@ class UserDataTable extends DataTable
             ->setTableId('user-table')
             ->columns($this->getColumns())
             ->minifiedAjax()
+            ->responsive([
+                'details' => [
+                    'type'   => 'inline',
+                    'target' => 'tr',
+                ]
+            ])
+            ->parameters([
+                'lengthChange' => false,
+            ])
+            ->columnDefs([
+                ['responsivePriority' => 1, 'targets' => 0], // Name   — always visible
+                ['responsivePriority' => 2, 'targets' => -1], // Actions — always visible
+                ['responsivePriority' => 3, 'targets' => 3], // Status
+                ['responsivePriority' => 4, 'targets' => 1], // Email
+                ['responsivePriority' => 5, 'targets' => 2], // Roles
+                ['responsivePriority' => 6, 'targets' => 4], // Joined — collapses first
+            ])
             ->layout([
-                'topStart' => [
-                    'buttons' => [
-                        'buttons' => [
-                            Button::make('excel')
-                                ->text('Excel')
-                                ->attr(['data-icon' => 'excel']),
-                            Button::make('pdf')
-                                ->text('PDF')
-                                ->attr(['data-icon' => 'pdf']),
-                        ]
-                    ]
-                ],
-                'topEnd' => 'search',
+                'topStart'    => null,
+                'topEnd'      => null,
                 'bottomStart' => 'info',
-                'bottomEnd' => 'paging',
+                'bottomEnd'   => 'paging',
             ])
             ->orderBy(0, 'asc')
             ->selectStyleSingle()
