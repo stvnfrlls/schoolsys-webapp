@@ -33,6 +33,9 @@ class RolePermissionSeeder extends Seeder
             'create permissions',
             'edit permissions',
             'delete permissions',
+
+            // Activity Logs
+            'view activity logs',
         ];
 
         foreach ($permissions as $permission) {

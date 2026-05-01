@@ -12,6 +12,14 @@ use App\DataTables\User\PermissionDataTable;
 
 class PermissionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view permissions')->only(['index', 'show']);
+        $this->middleware('permission:create permissions')->only(['create', 'store']);
+        $this->middleware('permission:edit permissions')->only(['edit', 'update']);
+        $this->middleware('permission:delete permissions')->only(['destroy']);
+    }
+    
     /**
      * Display a listing of permissions (DataTable).
      */
