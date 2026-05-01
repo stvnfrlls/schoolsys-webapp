@@ -79,8 +79,9 @@ class UserDataTable extends DataTable
                     'target' => 'tr',
                 ]
             ])
+            ->setTableAttribute('dom', 'lrtip')
             ->parameters([
-                'lengthChange' => false,
+                'lengthChange' => true,
             ])
             ->columnDefs([
                 ['responsivePriority' => 1, 'targets' => 0], // Name   — always visible

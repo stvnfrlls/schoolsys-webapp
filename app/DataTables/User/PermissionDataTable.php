@@ -63,8 +63,9 @@ class PermissionDataTable extends DataTable
                     'target' => 'tr',
                 ]
             ])
+            ->setTableAttribute('dom', 'lrtip')
             ->parameters([
-                'lengthChange' => false,
+                'lengthChange' => true,
             ])
             ->columnDefs([
                 ['responsivePriority' => 1, 'targets' => 1],
@@ -83,7 +84,8 @@ class PermissionDataTable extends DataTable
             ->orderBy(0, 'asc')
             ->selectStyleSingle()
             ->searching(true)
-            ->pageLength(15);
+            ->pageLength(15)
+            ->lengthMenu([[10, 15, 25, 50], [10, 15, 25, 50]]);
     }
 
     /**

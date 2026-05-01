@@ -45,36 +45,22 @@
             </div>
 
             {{-- Search + Export row --}}
-            <div class="flex items-center gap-2 sm:justify-end">
-
-                <div class="relative flex-1 max-w-xs sm:max-w-sm">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                        </svg>
+            <div id="search-export-row" class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div class="flex items-center gap-2 md:ml-auto">
+                    <div class="relative flex-1 md:flex-none">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                            </svg>
+                        </div>
+                        <input
+                            id="permissions-search"
+                            type="text"
+                            placeholder="Search permissions..."
+                            class="pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-school-600 focus:border-school-600 w-full md:w-36 lg:w-56">
                     </div>
-                    <input
-                        id="permissions-search"
-                        type="text"
-                        placeholder="Search permissions..."
-                        class="pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-school-600 focus:border-school-600 w-full">
-                </div>
-
-                <div id="dt-buttons" class="flex items-center gap-2 shrink-0">
-                    <button type="button" data-dt-button="excel"
-                        class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors whitespace-nowrap">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
-                        </svg>
-                        <span class="hidden sm:inline">Excel</span>
-                    </button>
-                    <button type="button" data-dt-button="pdf"
-                        class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-colors whitespace-nowrap">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
-                        </svg>
-                        <span class="hidden sm:inline">PDF</span>
-                    </button>
+    
+                    <x-dt-export-buttons />
                 </div>
             </div>
         </div>
@@ -94,9 +80,49 @@
         <style>
             /* ── Hide default DataTables UI ── */
             #permissions-table_filter,
-            #permissions-table_length,
             .dt-buttons {
                 display: none !important;
+            }
+
+            #permissions-table_length {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.75rem;
+                color: #64748b;
+                white-space: nowrap;
+            }
+            #permissions-table_length label {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.75rem;
+                color: #64748b;
+                white-space: nowrap;
+            }
+
+            #permissions-table_length select {
+                appearance: none;
+                -webkit-appearance: none;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 0.5rem center;
+                padding: 0.3rem 1.75rem 0.3rem 0.6rem;
+                font-size: 0.75rem;
+                font-weight: 500;
+                color: #475569;
+                background-color: #fff;
+                border: 1px solid #e2e8f0;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                transition: border-color 0.15s, box-shadow 0.15s;
+                min-width: 3.5rem;
+            }
+
+            #permissions-table_length select:focus {
+                outline: none;
+                border-color: #1e3a8a;
+                box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.15);
             }
 
             /* ── Table base ── */
@@ -193,9 +219,30 @@
                 gap: 0.25rem;
             }
 
+            @media (max-width: 639px) {
+                #permissions-table_length {
+                    justify-content: center;
+                }
+            }
+
             @media (min-width: 640px) {
                 #permissions-table_paginate {
                     justify-content: flex-end;
+                }
+                #permissions-table_length {
+                    justify-content: flex-start;
+                }
+            }
+
+             @media (max-width: 767px) {
+                #permissions-table_length {
+                    justify-content: flex-start;
+                }
+            }
+
+            @media (min-width: 768px) {
+                #permissions-table_length {
+                    justify-content: flex-start;
                 }
             }
 
@@ -248,11 +295,6 @@
                 #permissions-table_info {
                     text-align: left;
                 }
-
-                table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control,
-                table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control {
-                    text-align: unset;
-                }
             }
 
             /* ── Processing overlay ── */
@@ -285,6 +327,8 @@
             document.addEventListener('DOMContentLoaded', function () {
                 $('#permissions-table').on('init.dt', function () {
                     const table = $('#permissions-table').DataTable();
+                    const $length = $('#permissions-table_length').detach();
+                    $('#search-export-row').prepend($length);
 
                     // Wire custom search input
                     document.getElementById('permissions-search').addEventListener('input', function () {
