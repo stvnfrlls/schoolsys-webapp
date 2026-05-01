@@ -46,7 +46,7 @@
             </div>
 
             {{-- Search + Export row --}}
-            <div id="search-export-row" class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div id="search-export-row" class="flex flex-col gap-2 md:flex-row md:items-center justify-between">
                 <div class="flex items-center gap-2 md:ml-auto">
 
                     <div class="relative flex-1 md:flex-none">

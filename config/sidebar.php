@@ -118,7 +118,7 @@ return [
             ],
             [
                 'label' => 'Activity Logs',
-                'route' => '#',
+                'route' => 'activitylogs.index',
                 'permission' => 'view activity logs',
                 'child' => true,
             ],

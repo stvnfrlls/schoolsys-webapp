@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\ActivityLogController;
 use App\Http\Controllers\User\PermissionController;
 use App\Http\Controllers\User\RoleController;
 use App\Http\Controllers\User\UserController;
@@ -20,6 +20,8 @@ Route::middleware('auth')->group(function () {
         ->name('users.update-password');
     Route::resource('roles', RoleController::class);
     Route::resource('permissions', PermissionController::class);
+
+    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activitylogs.index');
 });
 
 require __DIR__ . '/auth.php';

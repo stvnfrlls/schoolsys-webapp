@@ -8,8 +8,8 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -56,6 +56,18 @@ class UserController extends Controller
 
                 $user->assignRole($data['role']);
 
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($user)
+                    ->withProperties([
+                        'attributes' => [
+                            'name'  => $user->name,
+                            'email' => $user->email,
+                            'role'  => $user->getRoleNames()->first(),
+                        ]
+                    ])
+                    ->log('Created user');
+
                 return $user;
             });
 
@@ -64,6 +76,17 @@ class UserController extends Controller
                 ->with('success', 'User created successfully.');
         } catch (\Throwable $e) {
             report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'error'   => $e->getMessage(),
+                        'file'    => $e->getFile(),
+                        'line'    => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to create user');
 
             return back()
                 ->withInput()
@@ -99,11 +122,36 @@ class UserController extends Controller
 
                 $data = $request->validated();
 
+                $old = [
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                    'role'  => $user->getRoleNames()->first(),
+                ];
+
                 $user->update(
                     collect($data)->except('role')->toArray()
                 );
 
-                $user->syncRoles($data['role']);
+                if (isset($data['password'])) {
+                    $user->update(['password' => Hash::make($data['password'])]);
+                }
+
+                if (isset($data['role'])) {
+                    $user->syncRoles($data['role']);
+                }
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($user)
+                    ->withProperties([
+                        'old'        => $old,
+                        'attributes' => [
+                            'name'  => $user->name,
+                            'email' => $user->email,
+                            'role'  => $user->getRoleNames()->first(),
+                        ]
+                    ])
+                    ->log('Updated user');
             });
 
             return redirect()
@@ -111,6 +159,18 @@ class UserController extends Controller
                 ->with('success', 'User updated successfully.');
         } catch (\Throwable $e) {
             report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($user)
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to update user');
 
             return back()
                 ->withInput()
@@ -124,8 +184,21 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         try {
-            DB::transaction(function () use ($user) {
+            $snapshot = [
+                'name'  => $user->name,
+                'email' => $user->email,
+                'role'  => $user->getRoleNames()->first(),
+            ];
+
+            DB::transaction(function () use ($user, $snapshot) {
                 $user->delete();
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->withProperties([
+                        'old' => $snapshot
+                    ])
+                    ->log('Deleted user');
             });
 
             return redirect()
@@ -133,6 +206,17 @@ class UserController extends Controller
                 ->with('success', "User '{$user->name}' deleted successfully.");
         } catch (\Throwable $e) {
             report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to delete user');
 
             return redirect()
                 ->route('users.index')

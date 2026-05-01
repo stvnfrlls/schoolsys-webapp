@@ -90,7 +90,7 @@
                                 <input
                                     type="checkbox"
                                     name="permissions[]"
-                                    value="{{ $permission->name }}"
+                                    value="{{ $permission->id }}"
                                     class="rounded border-gray-300 text-indigo-600"
                                     {{ in_array($permission->name, old('permissions', $role->permissions->pluck('name')->toArray())) ? 'checked' : '' }}>
                                 <span>{{ $permission->name }}</span>
