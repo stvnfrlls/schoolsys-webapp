@@ -69,7 +69,7 @@ return [
             ],
             [
                 'label' => 'Sections',
-                'route' => '#',
+                'route' => 'sections.index',
                 'permission' => 'view sections',
                 'child' => true,
             ],

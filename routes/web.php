@@ -5,6 +5,7 @@ use App\Http\Controllers\User\PermissionController;
 use App\Http\Controllers\User\RoleController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Curriculum\GradeLevelController;
+use App\Http\Controllers\Curriculum\SectionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -24,6 +25,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activitylogs.index');
     Route::resource('gradelevels', GradeLevelController::class)->parameters(['gradelevels' => 'gradeLevel']);
+    Route::resource('sections', SectionController::class);
 });
 
 require __DIR__ . '/auth.php';

@@ -14,4 +14,9 @@ class GradeLevel extends Model
         'level',
         'is_active',
     ];
+
+    public function section()
+    {
+        return $this->hasMany(Section::class);
+    }
 }
