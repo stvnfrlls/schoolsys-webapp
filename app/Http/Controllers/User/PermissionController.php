@@ -163,7 +163,7 @@ class PermissionController extends Controller
      */
     public function destroy(Permission $permission)
     {
-        if ($permission->roles()->where('name', 'admin')->exists()) {
+        if ($permission->roles()->whereRaw('LOWER(name) = ?', ['admin'])->exists()) {
             return redirect()
                 ->route('permissions.index')
                 ->with('error', 'This permission is currently assigned to the admin role and cannot be deleted.');

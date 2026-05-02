@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class PermissionControllerTest extends TestCase
@@ -16,15 +15,37 @@ class PermissionControllerTest extends TestCase
     private User $admin;
     private Role $adminRole;
 
+    // The permissions the controller's middleware actually checks for.
+    // These must exist in the DB AND be assigned to the role, otherwise
+    // every request returns 403 regardless of the user's role assignment.
+    private const CONTROLLER_PERMISSIONS = [
+        'view permissions',
+        'create permissions',
+        'edit permissions',
+        'delete permissions',
+    ];
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Spatie caches roles/permissions — always clear before each test
-        // to prevent stale state from bleeding between tests.
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->adminRole = Role::create(['name' => 'admin']);
+        // Create the role first.
+        $this->adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+
+        // Create each controller permission and grant it to the role.
+        // Without this the role exists but has no permissions, so the
+        // permission middleware returns 403 on every request.
+        foreach (self::CONTROLLER_PERMISSIONS as $permissionName) {
+            $permission = Permission::firstOrCreate([
+                'name'       => $permissionName,
+                'guard_name' => 'web',
+            ]);
+
+            $this->adminRole->givePermissionTo($permission);
+        }
+
         $this->admin = User::factory()->create();
         $this->admin->assignRole($this->adminRole);
     }
@@ -99,8 +120,9 @@ class PermissionControllerTest extends TestCase
             ->post(route('permissions.store'), ['name' => ''])
             ->assertSessionHasErrors('name');
 
-        // Nothing was persisted
-        $this->assertDatabaseCount('permissions', 0);
+        // setUp seeds controller permissions into the DB, so we cannot assert
+        // count is 0. Instead assert the specific name was never persisted.
+        $this->assertDatabaseMissing('permissions', ['name' => '']);
     }
 
     public function test_store_fails_validation_when_name_already_exists(): void
@@ -111,8 +133,8 @@ class PermissionControllerTest extends TestCase
             ->post(route('permissions.store'), ['name' => 'edit articles', 'guard_name' => 'web'])
             ->assertSessionHasErrors('name');
 
-        // Still only one record in the table
-        $this->assertDatabaseCount('permissions', 1);
+        // Exactly one record with this name — no duplicate was inserted.
+        $this->assertSame(1, Permission::where('name', 'edit articles')->count());
     }
 
     // -------------------------------------------------------------------------
@@ -193,7 +215,8 @@ class PermissionControllerTest extends TestCase
 
     public function test_update_succeeds_when_name_is_unchanged(): void
     {
-        // unique rule should ignore the record's own id (i.e. Rule::unique()->ignore())
+        // Verifies that the unique rule uses Rule::unique()->ignore() so a
+        // record can be saved with its own existing name without a conflict.
         $permission = Permission::create(['name' => 'same name']);
 
         $this->actingAs($this->admin)

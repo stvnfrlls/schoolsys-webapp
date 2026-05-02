@@ -4,6 +4,7 @@ use App\Http\Controllers\User\ActivityLogController;
 use App\Http\Controllers\User\PermissionController;
 use App\Http\Controllers\User\RoleController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Curriculum\GradeLevelController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,6 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('permissions', PermissionController::class);
 
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activitylogs.index');
+    Route::resource('gradelevels', GradeLevelController::class)->parameters(['gradelevels' => 'gradeLevel']);
 });
 
 require __DIR__ . '/auth.php';

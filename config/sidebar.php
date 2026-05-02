@@ -63,7 +63,7 @@ return [
         'items' => [
             [
                 'label' => 'Grade Levels',
-                'route' => '#',
+                'route' => 'gradelevels.index',
                 'permission' => 'view grade levels',
                 'child' => true,
             ],

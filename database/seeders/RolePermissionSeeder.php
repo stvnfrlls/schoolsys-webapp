@@ -36,6 +36,12 @@ class RolePermissionSeeder extends Seeder
 
             // Activity Logs
             'view activity logs',
+
+            // Grade Levels
+            'view grade levels',
+            'create grade levels',
+            'edit grade levels',
+            'delete grade levels',
         ];
 
         foreach ($permissions as $permission) {
