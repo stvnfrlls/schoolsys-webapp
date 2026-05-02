@@ -19,7 +19,7 @@
     {{-- Page card --}}
     <div class="bg-white rounded-xl border border-slate-200 max-w-2xl">
 
-        <form action="{{ route('gradelevels.store') }}" method="POST">
+        <form id="edit-gradelevel-form" action="{{ route('gradelevels.store') }}" method="POST">
             @csrf
             {{-- Card header --}}
             <div class="px-6 py-5 border-b border-slate-100">
@@ -40,11 +40,11 @@
                     </div>
                 </div>
             </div>
-    
+
             {{-- Form --}}
             <div class="p-6 space-y-6">
-    
-    
+
+
                 {{-- Grade Level Name --}}
                 <div>
                     <label for="name" class="block text-sm font-medium text-slate-700 mb-2">
@@ -57,7 +57,7 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-    
+
                 {{-- Level (Order) --}}
                 <div>
                     <label for="level" class="block text-sm font-medium text-slate-700 mb-2">
@@ -71,7 +71,7 @@
                     @enderror
                     <p class="mt-1 text-xs text-slate-500">Determines the display order of this grade level</p>
                 </div>
-    
+
                 {{-- Status --}}
                 <div>
                     <label for="is_active" class="block text-sm font-medium text-slate-700 mb-2">
@@ -88,7 +88,7 @@
                     @enderror
                     <p class="mt-1 text-xs text-slate-500">Make this grade level available for use</p>
                 </div>
-    
+
             </div>
         </form>
 
