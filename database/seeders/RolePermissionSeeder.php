@@ -42,6 +42,18 @@ class RolePermissionSeeder extends Seeder
             'create grade levels',
             'edit grade levels',
             'delete grade levels',
+
+            // Sections
+            'view sections',
+            'create sections',
+            'edit sections',
+            'delete sections',
+
+            // Subjects
+            'view subjects',
+            'create subjects',
+            'edit subjects',
+            'delete subjects',
         ];
 
         foreach ($permissions as $permission) {

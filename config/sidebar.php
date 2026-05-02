@@ -75,7 +75,7 @@ return [
             ],
             [
                 'label' => 'Subjects',
-                'route' => '#',
+                'route' => 'subjects.index',
                 'permission' => 'view subjects',
                 'child' => true,
             ],
