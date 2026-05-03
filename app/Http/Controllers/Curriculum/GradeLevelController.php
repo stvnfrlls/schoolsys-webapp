@@ -7,6 +7,8 @@ use App\DataTables\Curriculum\GradeLevelDataTable;
 use App\Http\Requests\StoreGradeLevelRequest;
 use App\Http\Requests\UpdateGradeLevelRequest;
 use App\Models\GradeLevel;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GradeLevelController extends Controller
 {
@@ -17,6 +19,7 @@ class GradeLevelController extends Controller
         $this->middleware('permission:edit grade levels')->only(['edit', 'update']);
         $this->middleware('permission:delete grade levels')->only(['destroy']);
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -30,9 +33,7 @@ class GradeLevelController extends Controller
      */
     public function create()
     {
-        $gradeLevel = GradeLevel::all();
-
-        return view('gradelevels.create', compact('gradeLevel'));
+        return view('gradelevels.create');
     }
 
     /**
@@ -40,9 +41,46 @@ class GradeLevelController extends Controller
      */
     public function store(StoreGradeLevelRequest $request)
     {
-        GradeLevel::create($request->validated());
+        try {
+            $gradeLevel = DB::transaction(function () use ($request) {
+                $gradeLevel = GradeLevel::create($request->validated());
 
-        return redirect()->route('gradelevels.index')->with('success', 'Grade Level created successfully.');
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($gradeLevel)
+                    ->withProperties([
+                        'attributes' => [
+                            'name'      => $gradeLevel->name,
+                            'level'     => $gradeLevel->level,
+                            'is_active' => $gradeLevel->is_active,
+                        ]
+                    ])
+                    ->log('Created grade level');
+
+                return $gradeLevel;
+            });
+
+            return redirect()
+                ->route('gradelevels.show', $gradeLevel)
+                ->with('success', 'Grade Level created successfully.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to create grade level');
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to create grade level. Please try again.');
+        }
     }
 
     /**
@@ -66,9 +104,52 @@ class GradeLevelController extends Controller
      */
     public function update(UpdateGradeLevelRequest $request, GradeLevel $gradeLevel)
     {
-        $gradeLevel->update($request->validated());
+        try {
+            DB::transaction(function () use ($request, $gradeLevel) {
+                $old = [
+                    'name'      => $gradeLevel->name,
+                    'level'     => $gradeLevel->level,
+                    'is_active' => $gradeLevel->is_active,
+                ];
 
-        return redirect()->route('gradelevels.index')->with('success', 'Grade Level updated successfully.');
+                $gradeLevel->update($request->validated());
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($gradeLevel)
+                    ->withProperties([
+                        'old'        => $old,
+                        'attributes' => [
+                            'name'      => $gradeLevel->name,
+                            'level'     => $gradeLevel->level,
+                            'is_active' => $gradeLevel->is_active,
+                        ]
+                    ])
+                    ->log('Updated grade level');
+            });
+
+            return redirect()
+                ->route('gradelevels.show', $gradeLevel)
+                ->with('success', 'Grade Level updated successfully.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($gradeLevel)
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to update grade level');
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to update grade level. Please try again.');
+        }
     }
 
     /**
@@ -76,8 +157,44 @@ class GradeLevelController extends Controller
      */
     public function destroy(GradeLevel $gradeLevel)
     {
-        $gradeLevel->delete();
+        try {
+            $snapshot = [
+                'name'      => $gradeLevel->name,
+                'level'     => $gradeLevel->level,
+                'is_active' => $gradeLevel->is_active,
+            ];
 
-        return redirect()->route('gradelevels.index')->with('success', 'Grade Level deleted successfully.');
+            DB::transaction(function () use ($gradeLevel, $snapshot) {
+                $gradeLevel->delete();
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->withProperties([
+                        'old' => $snapshot
+                    ])
+                    ->log('Deleted grade level');
+            });
+
+            return redirect()
+                ->route('gradelevels.index')
+                ->with('success', "Grade Level '{$gradeLevel->name}' deleted successfully.");
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to delete grade level');
+
+            return redirect()
+                ->route('gradelevels.index')
+                ->with('error', 'Failed to delete grade level. Please try again.');
+        }
     }
 }

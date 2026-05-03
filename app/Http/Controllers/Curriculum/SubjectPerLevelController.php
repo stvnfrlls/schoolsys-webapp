@@ -9,6 +9,8 @@ use App\Models\SubjectPerLevel;
 use App\DataTables\Curriculum\SubjectPerLevelDataTable;
 use App\Http\Requests\StoreSubjectPerLevelRequest;
 use App\Http\Requests\UpdateSubjectPerLevelRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SubjectPerLevelController extends Controller
 {
@@ -35,7 +37,7 @@ class SubjectPerLevelController extends Controller
     {
         return view('subjectperlevel.create', [
             'gradeLevels' => GradeLevel::all(),
-            'subjects' => Subject::all(),
+            'subjects'    => Subject::all(),
         ]);
     }
 
@@ -44,11 +46,49 @@ class SubjectPerLevelController extends Controller
      */
     public function store(StoreSubjectPerLevelRequest $request)
     {
-        SubjectPerLevel::create($request->validated());
+        try {
+            $subjectperlevel = DB::transaction(function () use ($request) {
+                $subjectperlevel = SubjectPerLevel::create($request->validated());
 
-        return redirect()
-            ->route('subjectperlevel.index')
-            ->with('success', 'Subject assignment created successfully.');
+                $subjectperlevel->load('gradeLevel', 'subject');
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($subjectperlevel)
+                    ->withProperties([
+                        'attributes' => [
+                            'grade_level'   => $subjectperlevel->gradeLevel->name,
+                            'subject'       => $subjectperlevel->subject->name,
+                            'hours_per_week' => $subjectperlevel->hours_per_week,
+                            'is_active'     => $subjectperlevel->is_active,
+                        ]
+                    ])
+                    ->log('Created subject assignment');
+
+                return $subjectperlevel;
+            });
+
+            return redirect()
+                ->route('subjectperlevel.show', $subjectperlevel)
+                ->with('success', 'Subject assignment created successfully.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to create subject assignment');
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to create subject assignment. Please try again.');
+        }
     }
 
     /**
@@ -56,6 +96,8 @@ class SubjectPerLevelController extends Controller
      */
     public function show(SubjectPerLevel $subjectperlevel)
     {
+        $subjectperlevel->load('gradeLevel', 'subject');
+
         return view('subjectperlevel.show', compact('subjectperlevel'));
     }
 
@@ -65,7 +107,7 @@ class SubjectPerLevelController extends Controller
     public function edit(SubjectPerLevel $subjectperlevel)
     {
         $gradeLevels = GradeLevel::all();
-        $subjects = Subject::all();
+        $subjects    = Subject::all();
 
         return view('subjectperlevel.edit', compact('subjectperlevel', 'gradeLevels', 'subjects'));
     }
@@ -75,11 +117,58 @@ class SubjectPerLevelController extends Controller
      */
     public function update(UpdateSubjectPerLevelRequest $request, SubjectPerLevel $subjectperlevel)
     {
-        $subjectperlevel->update($request->validated());
+        try {
+            DB::transaction(function () use ($request, $subjectperlevel) {
+                $subjectperlevel->load('gradeLevel', 'subject');
 
-        return redirect()
-            ->route('subjectperlevel.show', $subjectperlevel)
-            ->with('success', 'Subject assignment updated successfully.');
+                $old = [
+                    'grade_level'    => $subjectperlevel->gradeLevel->name,
+                    'subject'        => $subjectperlevel->subject->name,
+                    'hours_per_week' => $subjectperlevel->hours_per_week,
+                    'is_active'      => $subjectperlevel->is_active,
+                ];
+
+                $subjectperlevel->update($request->validated());
+
+                $subjectperlevel->load('gradeLevel', 'subject'); // reload in case FKs changed
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($subjectperlevel)
+                    ->withProperties([
+                        'old'        => $old,
+                        'attributes' => [
+                            'grade_level'    => $subjectperlevel->gradeLevel->name,
+                            'subject'        => $subjectperlevel->subject->name,
+                            'hours_per_week' => $subjectperlevel->hours_per_week,
+                            'is_active'      => $subjectperlevel->is_active,
+                        ]
+                    ])
+                    ->log('Updated subject assignment');
+            });
+
+            return redirect()
+                ->route('subjectperlevel.show', $subjectperlevel)
+                ->with('success', 'Subject assignment updated successfully.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($subjectperlevel)
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to update subject assignment');
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to update subject assignment. Please try again.');
+        }
     }
 
     /**
@@ -87,8 +176,47 @@ class SubjectPerLevelController extends Controller
      */
     public function destroy(SubjectPerLevel $subjectperlevel)
     {
-        $subjectperlevel->delete();
+        try {
+            $subjectperlevel->load('gradeLevel', 'subject');
 
-        return redirect()->route('subjectperlevel.index')->with('success', 'Subject Assignment deleted successfully.');
+            $snapshot = [
+                'grade_level'    => $subjectperlevel->gradeLevel->name,
+                'subject'        => $subjectperlevel->subject->name,
+                'hours_per_week' => $subjectperlevel->hours_per_week,
+                'is_active'      => $subjectperlevel->is_active,
+            ];
+
+            DB::transaction(function () use ($subjectperlevel, $snapshot) {
+                $subjectperlevel->delete();
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->withProperties([
+                        'old' => $snapshot
+                    ])
+                    ->log('Deleted subject assignment');
+            });
+
+            return redirect()
+                ->route('subjectperlevel.index')
+                ->with('success', "Subject assignment '{$subjectperlevel->subject->name}' deleted successfully.");
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to delete subject assignment');
+
+            return redirect()
+                ->route('subjectperlevel.index')
+                ->with('error', 'Failed to delete subject assignment. Please try again.');
+        }
     }
 }

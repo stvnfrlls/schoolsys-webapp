@@ -7,7 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSubjectRequest;
 use App\Http\Requests\UpdateSubjectRequest;
 use App\Models\Subject;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SubjectController extends Controller
 {
@@ -40,9 +41,47 @@ class SubjectController extends Controller
      */
     public function store(StoreSubjectRequest $request)
     {
-        Subject::create($request->validated());
+        try {
+            $subject = DB::transaction(function () use ($request) {
+                $subject = Subject::create($request->validated());
 
-        return redirect()->route('subjects.index')->with('success', 'Subject created successfully.');
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($subject)
+                    ->withProperties([
+                        'attributes' => [
+                            'name'        => $subject->name,
+                            'code'        => $subject->code,
+                            'description' => $subject->description,
+                            'is_active'   => $subject->is_active,
+                        ]
+                    ])
+                    ->log('Created subject');
+
+                return $subject;
+            });
+
+            return redirect()
+                ->route('subjects.show', $subject)
+                ->with('success', 'Subject created successfully.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to create subject');
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to create subject. Please try again.');
+        }
     }
 
     /**
@@ -66,9 +105,54 @@ class SubjectController extends Controller
      */
     public function update(UpdateSubjectRequest $request, Subject $subject)
     {
-        $subject->update($request->validated());
+        try {
+            DB::transaction(function () use ($request, $subject) {
+                $old = [
+                    'name'        => $subject->name,
+                    'code'        => $subject->code,
+                    'description' => $subject->description,
+                    'is_active'   => $subject->is_active,
+                ];
 
-        return redirect()->route('subjects.index')->with('success', 'Subject updated successfully.');
+                $subject->update($request->validated());
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($subject)
+                    ->withProperties([
+                        'old'        => $old,
+                        'attributes' => [
+                            'name'        => $subject->name,
+                            'code'        => $subject->code,
+                            'description' => $subject->description,
+                            'is_active'   => $subject->is_active,
+                        ]
+                    ])
+                    ->log('Updated subject');
+            });
+
+            return redirect()
+                ->route('subjects.show', $subject)
+                ->with('success', 'Subject updated successfully.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($subject)
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to update subject');
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to update subject. Please try again.');
+        }
     }
 
     /**
@@ -76,8 +160,45 @@ class SubjectController extends Controller
      */
     public function destroy(Subject $subject)
     {
-        $subject->delete();
+        try {
+            $snapshot = [
+                'name'        => $subject->name,
+                'code'        => $subject->code,
+                'description' => $subject->description,
+                'is_active'   => $subject->is_active,
+            ];
 
-        return redirect()->route('subjects.index')->with('success', 'Subject deleted successfully.');
+            DB::transaction(function () use ($subject, $snapshot) {
+                $subject->delete();
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->withProperties([
+                        'old' => $snapshot
+                    ])
+                    ->log('Deleted subject');
+            });
+
+            return redirect()
+                ->route('subjects.index')
+                ->with('success', "Subject '{$subject->name}' deleted successfully.");
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to delete subject');
+
+            return redirect()
+                ->route('subjects.index')
+                ->with('error', 'Failed to delete subject. Please try again.');
+        }
     }
 }

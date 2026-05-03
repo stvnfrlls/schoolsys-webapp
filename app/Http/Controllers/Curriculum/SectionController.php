@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\DataTables\Curriculum\SectionDataTable;
 use App\Http\Requests\StoreSectionRequest;
 use App\Http\Requests\UpdateSectionRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class SectionController extends Controller
 {
@@ -36,14 +38,54 @@ class SectionController extends Controller
 
         return view('sections.create', compact('gradeLevels'));
     }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(StoreSectionRequest $request)
     {
-        Section::create($request->validated());
+        try {
+            $section = DB::transaction(function () use ($request) {
+                $section = Section::create($request->validated());
 
-        return redirect()->route('sections.index')->with('success', 'Section successfully created.');
+                $section->load('gradeLevel');
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($section)
+                    ->withProperties([
+                        'attributes' => [
+                            'name'        => $section->name,
+                            'grade_level' => $section->gradeLevel->name,
+                            'is_active'   => $section->is_active,
+                        ]
+                    ])
+                    ->log('Created section');
+
+                return $section;
+            });
+
+            return redirect()
+                ->route('sections.show', $section)
+                ->with('success', 'Section created successfully.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to create section');
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to create section. Please try again.');
+        }
     }
 
     /**
@@ -71,9 +113,56 @@ class SectionController extends Controller
      */
     public function update(UpdateSectionRequest $request, Section $section)
     {
-        $section->update($request->validated());
+        try {
+            DB::transaction(function () use ($request, $section) {
+                $section->load('gradeLevel');
 
-        return redirect()->route('sections.index')->with('success', 'Section successfully updated.');
+                $old = [
+                    'name'        => $section->name,
+                    'grade_level' => $section->gradeLevel->name,
+                    'is_active'   => $section->is_active,
+                ];
+
+                $section->update($request->validated());
+
+                $section->load('gradeLevel'); // reload in case grade_level_id changed
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->performedOn($section)
+                    ->withProperties([
+                        'old'        => $old,
+                        'attributes' => [
+                            'name'        => $section->name,
+                            'grade_level' => $section->gradeLevel->name,
+                            'is_active'   => $section->is_active,
+                        ]
+                    ])
+                    ->log('Updated section');
+            });
+
+            return redirect()
+                ->route('sections.show', $section)
+                ->with('success', 'Section updated successfully.');
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($section)
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to update section');
+
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to update section. Please try again.');
+        }
     }
 
     /**
@@ -81,8 +170,46 @@ class SectionController extends Controller
      */
     public function destroy(Section $section)
     {
-        $section->delete();
+        try {
+            $section->load('gradeLevel');
 
-        return redirect()->route('sections.index')->with('success', 'Section successfully deleted.');
+            $snapshot = [
+                'name'        => $section->name,
+                'grade_level' => $section->gradeLevel->name,
+                'is_active'   => $section->is_active,
+            ];
+
+            DB::transaction(function () use ($section, $snapshot) {
+                $section->delete();
+
+                activity()
+                    ->causedBy(Auth::user())
+                    ->withProperties([
+                        'old' => $snapshot
+                    ])
+                    ->log('Deleted section');
+            });
+
+            return redirect()
+                ->route('sections.index')
+                ->with('success', "Section '{$section->name}' deleted successfully.");
+        } catch (\Throwable $e) {
+            report($e);
+
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'attributes' => [
+                        'error' => $e->getMessage(),
+                        'file'  => $e->getFile(),
+                        'line'  => (string) $e->getLine(),
+                    ]
+                ])
+                ->log('Failed to delete section');
+
+            return redirect()
+                ->route('sections.index')
+                ->with('error', 'Failed to delete section. Please try again.');
+        }
     }
 }
