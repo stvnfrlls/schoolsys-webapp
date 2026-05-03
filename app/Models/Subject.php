@@ -12,4 +12,9 @@ class Subject extends Model
         'description',
         'is_actve'
     ];
+
+    public function subjectPerLevel()
+    {
+        return $this->hasMany(SubjectPerLevel::class);
+    }
 }

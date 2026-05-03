@@ -19,4 +19,9 @@ class GradeLevel extends Model
     {
         return $this->hasMany(Section::class);
     }
+
+    public function subjectPerLevel()
+    {
+        return $this->hasMany(SubjectPerLevel::class);
+    }
 }

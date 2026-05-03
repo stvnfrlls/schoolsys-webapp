@@ -81,8 +81,8 @@ return [
             ],
             [
                 'label' => 'Subjects per Grade',
-                'route' => '#',
-                'permission' => 'view subject assignments',
+                'route' => 'subjectperlevel.index',
+                'permission' => 'view subject per level',
                 'child' => true,
             ],
             [

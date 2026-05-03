@@ -7,6 +7,7 @@ use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Curriculum\GradeLevelController;
 use App\Http\Controllers\Curriculum\SectionController;
 use App\Http\Controllers\Curriculum\SubjectController;
+use App\Http\Controllers\Curriculum\SubjectPerLevelController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -28,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('gradelevels', GradeLevelController::class)->parameters(['gradelevels' => 'gradeLevel']);
     Route::resource('sections', SectionController::class);
     Route::resource('subjects', SubjectController::class);
+    Route::resource('subjectperlevel', SubjectPerLevelController::class);
 });
 
 require __DIR__ . '/auth.php';
