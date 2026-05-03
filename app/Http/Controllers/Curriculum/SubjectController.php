@@ -4,11 +4,21 @@ namespace App\Http\Controllers\Curriculum;
 
 use App\DataTables\Curriculum\SubjectDataTable;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSubjectRequest;
+use App\Http\Requests\UpdateSubjectRequest;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 
 class SubjectController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view subjects')->only(['index', 'show']);
+        $this->middleware('permission:create subjects')->only(['create', 'store']);
+        $this->middleware('permission:edit subjects')->only(['edit', 'update']);
+        $this->middleware('permission:delete subjects')->only(['destroy']);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -28,16 +38,9 @@ class SubjectController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreSubjectRequest $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:255'],
-            'description' => ['nullable'],
-            'is_active' => ['required', 'in:active,inactive'],
-        ]);
-
-        Subject::create($validated);
+        Subject::create($request->validated());
 
         return redirect()->route('subjects.index')->with('success', 'Subject created successfully.');
     }
@@ -61,16 +64,9 @@ class SubjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Subject $subject)
+    public function update(UpdateSubjectRequest $request, Subject $subject)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:255'],
-            'description' => ['nullable'],
-            'is_active' => ['required', 'in:active,inactive'],
-        ]);
-
-        $subject->update($validated);
+        $subject->update($request->validated());
 
         return redirect()->route('subjects.index')->with('success', 'Subject updated successfully.');
     }
