@@ -60,6 +60,12 @@ class RolePermissionSeeder extends Seeder
             'create subject per level',
             'edit subject per level',
             'delete subject per level',
+
+            // Students
+            'view students',
+            'create students',
+            'edit students',
+            'delete students',
         ];
 
         foreach ($permissions as $permission) {
