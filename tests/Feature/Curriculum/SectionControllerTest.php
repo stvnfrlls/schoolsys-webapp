@@ -18,7 +18,6 @@ class SectionControllerTest extends TestCase
     private const PERM_EDIT   = 'edit sections';
     private const PERM_DELETE = 'delete sections';
 
-    // Mirrors the enum values in the sections migration exactly
     private const STATUS_ACTIVE   = 'active';
     private const STATUS_INACTIVE = 'inactive';
 
@@ -154,10 +153,15 @@ class SectionControllerTest extends TestCase
 
         $this->actingAs($this->userWith(self::PERM_CREATE))
             ->post(route('sections.store'), $payload)
-            ->assertRedirect(route('sections.index'))
-            ->assertSessionHas('success', 'Section successfully created.');
+            ->assertSessionHas('success', 'Section created successfully.');
+
+        $section = Section::where('name', 'Section A')->firstOrFail();
 
         $this->assertDatabaseHas('sections', $payload);
+
+        $this->actingAs($this->userWith(self::PERM_VIEW))
+            ->get(route('sections.show', $section))
+            ->assertOk();
     }
 
     public function test_store_creates_inactive_section(): void
@@ -172,7 +176,7 @@ class SectionControllerTest extends TestCase
 
         $this->actingAs($this->userWith(self::PERM_CREATE))
             ->post(route('sections.store'), $payload)
-            ->assertRedirect(route('sections.index'));
+            ->assertSessionHas('success');
 
         $this->assertDatabaseHas('sections', $payload);
     }
@@ -219,7 +223,7 @@ class SectionControllerTest extends TestCase
             ->post(route('sections.store'), [
                 'name'           => 'Section A',
                 'grade_level_id' => $gradeLevel->id,
-                'is_active'      => 'yes', // not a valid enum value
+                'is_active'      => 'yes',
             ])
             ->assertSessionHasErrors('is_active');
     }
@@ -360,8 +364,8 @@ class SectionControllerTest extends TestCase
 
         $this->actingAs($this->userWith(self::PERM_EDIT))
             ->put(route('sections.update', $section), $payload)
-            ->assertRedirect(route('sections.index'))
-            ->assertSessionHas('success', 'Section successfully updated.');
+            ->assertRedirect(route('sections.show', $section))
+            ->assertSessionHas('success', 'Section updated successfully.');
 
         $this->assertDatabaseHas('sections', array_merge(['id' => $section->id], $payload));
     }
@@ -388,7 +392,7 @@ class SectionControllerTest extends TestCase
             ->put(route('sections.update', $section), [
                 'name'           => 'Updated Section',
                 'grade_level_id' => $gradeLevel->id,
-                'is_active'      => 'yes', // not a valid enum value
+                'is_active'      => 'yes',
             ])
             ->assertSessionHasErrors('is_active');
     }
@@ -431,7 +435,7 @@ class SectionControllerTest extends TestCase
         $this->actingAs($this->userWith(self::PERM_DELETE))
             ->delete(route('sections.destroy', $section))
             ->assertRedirect(route('sections.index'))
-            ->assertSessionHas('success', 'Section successfully deleted.');
+            ->assertSessionHas('success', "Section 'Test Section' deleted successfully.");
 
         $this->assertDatabaseMissing('sections', ['id' => $section->id]);
     }

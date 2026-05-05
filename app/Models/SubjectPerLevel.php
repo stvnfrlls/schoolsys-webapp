@@ -4,6 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int    $id
+ * @property int    $gradelevel_id
+ * @property int    $subject_id
+ * @property int    $hours_per_week
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ *
+ * @property-read GradeLevel $gradeLevel
+ * @property-read Subject    $subject
+ */
 class SubjectPerLevel extends Model
 {
     protected $fillable = [

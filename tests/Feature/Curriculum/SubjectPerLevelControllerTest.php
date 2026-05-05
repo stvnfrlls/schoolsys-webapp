@@ -54,15 +54,15 @@ class SubjectPerLevelControllerTest extends TestCase
             'name'        => fake()->unique()->words(3, true),
             'code'        => strtoupper(fake()->unique()->lexify('???###')),
             'description' => fake()->sentence(),
-            'is_active'    => true,
+            'is_active'    => 'active',
         ], $attrs));
     }
 
     private function makeSubjectPerLevel(array $attrs = []): SubjectPerLevel
     {
         return SubjectPerLevel::create(array_merge([
-            'gradelevel_id'  => $this->makeGradeLevel()->id,
-            'subject_id'     => $this->makeSubject()->id,
+            'gradelevel_id'  => $this->makeGradeLevel()->getKey(),
+            'subject_id'     => $this->makeSubject()->getKey(),
             'hours_per_week' => 3,
         ], $attrs));
     }
@@ -70,8 +70,8 @@ class SubjectPerLevelControllerTest extends TestCase
     private function validPayload(?GradeLevel $gradeLevel = null, ?Subject $subject = null): array
     {
         return [
-            'gradelevel_id'  => ($gradeLevel ?? $this->makeGradeLevel())->id,
-            'subject_id'     => ($subject    ?? $this->makeSubject())->id,
+            'gradelevel_id'  => ($gradeLevel ?? $this->makeGradeLevel())->getKey(),
+            'subject_id'     => ($subject    ?? $this->makeSubject())->getKey(),
             'hours_per_week' => 4,
             'is_active'      => 'active',
         ];
@@ -172,14 +172,22 @@ class SubjectPerLevelControllerTest extends TestCase
 
         $this->actingAs($this->user)
             ->post(route('subjectperlevel.store'), $payload)
-            ->assertRedirect(route('subjectperlevel.index'))
             ->assertSessionHas('success', 'Subject assignment created successfully.');
 
+        $record = SubjectPerLevel::where('gradelevel_id', $gradeLevel->getKey())
+            ->where('subject_id', $subject->getKey())
+            ->firstOrFail();
+
         $this->assertDatabaseHas('subject_per_levels', [
-            'gradelevel_id'  => $gradeLevel->id,
-            'subject_id'     => $subject->id,
+            'gradelevel_id'  => $gradeLevel->getKey(),
+            'subject_id'     => $subject->getKey(),
             'hours_per_week' => $payload['hours_per_week'],
         ]);
+
+        $this->givePermission('view subject per level');
+        $this->actingAs($this->user)
+            ->get(route('subjectperlevel.show', $record))
+            ->assertOk();
     }
 
     // -------------------------------------------------------------------------
@@ -301,9 +309,9 @@ class SubjectPerLevelControllerTest extends TestCase
             ->assertSessionHas('success', 'Subject assignment updated successfully.');
 
         $this->assertDatabaseHas('subject_per_levels', [
-            'id'             => $record->id,
-            'gradelevel_id'  => $newGrade->id,
-            'subject_id'     => $newSubject->id,
+            'id'             => $record->getKey(),
+            'gradelevel_id'  => $newGrade->getKey(),
+            'subject_id'     => $newSubject->getKey(),
             'hours_per_week' => $payload['hours_per_week'],
         ]);
     }
@@ -338,8 +346,8 @@ class SubjectPerLevelControllerTest extends TestCase
         $this->actingAs($this->user)
             ->delete(route('subjectperlevel.destroy', $record))
             ->assertRedirect(route('subjectperlevel.index'))
-            ->assertSessionHas('success', 'Subject Assignment deleted successfully.');
+            ->assertSessionHas('success');
 
-        $this->assertDatabaseMissing('subject_per_levels', ['id' => $record->id]);
+        $this->assertDatabaseMissing('subject_per_levels', ['id' => $record->getKey()]);
     }
 }

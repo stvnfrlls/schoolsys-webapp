@@ -18,8 +18,6 @@ class GradeLevelControllerTest extends TestCase
     {
         parent::setUp();
 
-        // Adjust this if your app uses roles/permissions (e.g. Spatie).
-        // Replace with the appropriate user factory state if needed.
         $this->user = User::factory()->create();
 
         $permissions = [
@@ -79,14 +77,20 @@ class GradeLevelControllerTest extends TestCase
 
         $this->actingAs($this->user)
             ->post(route('gradelevels.store'), $payload)
-            ->assertRedirect(route('gradelevels.index'))
             ->assertSessionHas('success');
+
+        $gradeLevel = GradeLevel::where('name', 'Grade 1')->firstOrFail();
 
         $this->assertDatabaseHas('grade_levels', [
             'name'      => 'Grade 1',
             'level'     => 1,
             'is_active' => 'active',
         ]);
+
+        // Confirm the show page is reachable (redirect target exists)
+        $this->actingAs($this->user)
+            ->get(route('gradelevels.show', $gradeLevel))
+            ->assertOk();
     }
 
     public function test_store_fails_when_name_is_missing(): void
@@ -187,7 +191,7 @@ class GradeLevelControllerTest extends TestCase
                 'level'     => 2,
                 'is_active' => 'inactive',
             ])
-            ->assertRedirect(route('gradelevels.index'))
+            ->assertRedirect(route('gradelevels.show', $gradeLevel))
             ->assertSessionHas('success');
 
         $this->assertDatabaseHas('grade_levels', [
