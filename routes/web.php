@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Curriculum\EnrollmentController;
 use App\Http\Controllers\User\ActivityLogController;
 use App\Http\Controllers\User\PermissionController;
 use App\Http\Controllers\User\RoleController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Curriculum\GradeLevelController;
+use App\Http\Controllers\Curriculum\SchoolYearController;
 use App\Http\Controllers\Curriculum\SectionController;
 use App\Http\Controllers\Curriculum\SubjectController;
 use App\Http\Controllers\Curriculum\SubjectPerLevelController;
@@ -33,6 +35,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('subjectperlevel', SubjectPerLevelController::class);
 
     Route::resource('students', StudentController::class);
+    Route::resource('enrollments', EnrollmentController::class);
+    Route::resource('schoolyears', SchoolYearController::class);
 });
 
 require __DIR__ . '/auth.php';

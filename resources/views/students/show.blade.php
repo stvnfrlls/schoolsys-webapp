@@ -131,21 +131,38 @@
 
             {{-- Section: Enrollment Status --}}
             <div class="pb-4">
-                <div class="py-3 border-b border-slate-100 mb-4">
-                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest font-sans">Enrollment Status</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Current academic standing of the student</p>
+                <div class="pb-4 border-b border-slate-100 mb-4">
+                    <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest font-sans">Enrollment</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Assign the student to a school year and section</p>
                 </div>
 
                 <dl class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-1">
+                        <dt class="text-xs font-medium text-slate-400 uppercase tracking-wide pt-0.5">School Year</dt>
+                        <dd class="sm:col-span-2 text-sm text-slate-700">
+                            {{ $student->enrollment?->schoolYear?->label ?? '—' }}
+                        </dd>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-1">
+                        <dt class="text-xs font-medium text-slate-400 uppercase tracking-wide pt-0.5">Grade Level &
+                            Section</dt>
+                        <dd class="sm:col-span-2 text-sm text-slate-700">
+                            @if ($student->enrollment?->section)
+                                {{ $student->enrollment->section->gradeLevel->name ?? 'No Grade' }} —
+                                {{ $student->enrollment->section->name }}
+                            @else
+                                —
+                            @endif
+                        </dd>
+                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-1">
                         <dt class="text-xs font-medium text-slate-400 uppercase tracking-wide pt-0.5">Status</dt>
                         <dd class="sm:col-span-2">
                             @php
                                 $statusStyles = [
-                                    'enrolled'   => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+                                    'active' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
                                     'graduated'  => 'bg-blue-50 text-blue-700 border border-blue-200',
-                                    'dropped'    => 'bg-red-50 text-red-700 border border-red-200',
-                                    'transferee' => 'bg-amber-50 text-amber-700 border border-amber-200',
+                                    'inactive'   => 'bg-slate-50 text-slate-600 border border-slate-200',
                                 ];
                                 $style = $statusStyles[$student->status] ?? 'bg-slate-50 text-slate-600 border border-slate-200';
                             @endphp

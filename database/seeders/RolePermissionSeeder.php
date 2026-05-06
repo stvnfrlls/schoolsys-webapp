@@ -66,6 +66,18 @@ class RolePermissionSeeder extends Seeder
             'create students',
             'edit students',
             'delete students',
+
+            // Enrollments
+            'view enrollments',
+            'create enrollments',
+            'edit enrollments',
+            'delete enrollments',
+
+            // School Year
+            'view school years',
+            'create school years',
+            'edit school years',
+            'delete school years',
         ];
 
         foreach ($permissions as $permission) {

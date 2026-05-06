@@ -272,11 +272,9 @@
                         <select id="status" name="status"
                             class="w-full px-4 py-2 text-sm border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-school-600 focus:border-school-600 @error('status') border-red-500 @enderror">
                             <option value="">-- Select Status --</option>
-                            <option value="enrolled" {{ old('status', $student->status) === 'enrolled' ? 'selected' : '' }}>Enrolled</option>
+                            <option value="active" {{ old('status', $student->status) === 'active' ? 'selected' : '' }}>Active</option>
                             <option value="graduated" {{ old('status', $student->status) === 'graduated' ? 'selected' : '' }}>Graduated</option>
-                            <option value="dropped" {{ old('status', $student->status) === 'dropped' ? 'selected' : '' }}>
-                                Dropped</option>
-                            <option value="transferee" {{ old('status', $student->status) === 'transferee' ? 'selected' : '' }}>Transferee</option>
+                            <option value="inactive" {{ old('status', $student->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
                         </select>
                         @error('status')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

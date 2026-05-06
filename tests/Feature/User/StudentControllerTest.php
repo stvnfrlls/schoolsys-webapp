@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\User;
 
+use App\Models\GradeLevel;
+use App\Models\SchoolYear;
+use App\Models\Section;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -55,6 +58,25 @@ class StudentControllerTest extends TestCase
      */
     private function validPayload(array $overrides = []): array
     {
+        $gradeLevel = GradeLevel::create([
+            'name'      => 'Grade 1',
+            'level'     => 1,
+            'is_active' => 'active',
+        ]);
+
+        $section = Section::create([
+            'grade_level_id' => $gradeLevel->id,
+            'name'           => 'Section A',
+            'is_active'      => 'active',
+        ]);
+
+        $schoolYear = SchoolYear::create([
+            'name'       => '2024-2025',
+            'start_date' => '2024-06-01',
+            'end_date'   => '2025-03-31',
+            'is_active'  => 'active',
+        ]);
+
         return array_merge([
             'student_number'        => 'STU-2024-001',
             'first_name'            => 'John',
@@ -70,7 +92,9 @@ class StudentControllerTest extends TestCase
             'guardian_name'         => 'Jane Doe',
             'guardian_contact'      => '09179876543',
             'guardian_relationship' => 'Mother',
-            'status'                => 'enrolled',
+            'status'                => 'active',
+            'school_year_id'        => $schoolYear->id,
+            'section_id'            => $section->id,
         ], $overrides);
     }
 
@@ -87,7 +111,7 @@ class StudentControllerTest extends TestCase
             'student_number' => 'STU-' . uniqid(),
             'first_name'     => 'Test',
             'last_name'      => 'Student',
-            'status'         => 'enrolled',
+            'status'         => 'active',
         ], $overrides));
     }
 
@@ -318,7 +342,7 @@ class StudentControllerTest extends TestCase
             'first_name'     => 'Jane',
             'last_name'      => 'Smith',
             'email'          => $student->user->email,
-            'status'         => 'enrolled',
+            'status'         => 'active',
         ];
 
         $this->actingAs($this->adminUser)
@@ -344,7 +368,7 @@ class StudentControllerTest extends TestCase
                 'first_name'     => 'UpdatedFirst',
                 'last_name'      => 'UpdatedLast',
                 'email'          => $student->user->email,
-                'status'         => 'enrolled',
+                'status'         => 'active',
             ]);
 
         $this->assertDatabaseHas('users', [
@@ -375,7 +399,7 @@ class StudentControllerTest extends TestCase
                 'first_name'     => 'Jane',
                 'last_name'      => 'Smith',
                 'email'          => $student->user->email,
-                'status'         => 'enrolled',
+                'status'         => 'active',
             ])
             ->assertForbidden();
     }

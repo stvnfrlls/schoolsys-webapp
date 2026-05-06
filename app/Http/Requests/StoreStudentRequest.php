@@ -39,7 +39,11 @@ class StoreStudentRequest extends FormRequest
             'guardian_name'         => ['nullable', 'string', 'max:100'],
             'guardian_contact'      => ['nullable', 'string', 'max:20'],
             'guardian_relationship' => ['nullable', 'string', 'max:50'],
-            'status'                => ['required', 'in:enrolled,graduated,dropped,transferee'],
+            'status'                => ['required', 'in:active,graduated,inactive'],
+
+            'school_year_id'        => ['required', 'exists:school_years,id'],
+            'section_id'            => ['required', 'exists:sections,id'],
+            'enrolled_at'           => ['nullable', 'date'],
         ];
     }
 }

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
+use App\Models\SchoolYear;
+use App\Models\Section;
 
 class StudentController extends Controller
 {
@@ -35,7 +37,10 @@ class StudentController extends Controller
      */
     public function create()
     {
-        return view('students.create');
+        return view('students.create', [
+            'schoolYears' => SchoolYear::orderByDesc('start_date')->get(),
+            'sections'    => Section::with('gradeLevel')->orderBy('name')->get(),
+        ]);
     }
 
     /**
@@ -69,7 +74,14 @@ class StudentController extends Controller
                     'guardian_name'          => $data['guardian_name'] ?? null,
                     'guardian_contact'       => $data['guardian_contact'] ?? null,
                     'guardian_relationship'  => $data['guardian_relationship'] ?? null,
-                    'status'                 => $data['status'] ?? 'enrolled',
+                    'status'                 => $data['status'] ?? 'active',
+                ]);
+
+                $student->enrollments()->create([
+                    'school_year_id' => $data['school_year_id'],
+                    'section_id'     => $data['section_id'],
+                    'enrolled_at'    => $data['enrolled_at'] ?? now()->toDateString(),
+                    'status'         => 'enrolled',
                 ]);
 
                 activity()

@@ -32,8 +32,8 @@ return [
             ],
             [
                 'label' => 'Enrollment',
-                'route' => 'enrollment.index',
-                'permission' => 'view enrollment',
+                'route' => 'enrollments.index',
+                'permission' => 'view enrollments',
                 'child' => true,
             ],
             [
@@ -87,7 +87,7 @@ return [
             ],
             [
                 'label' => 'School Years',
-                'route' => '#',
+                'route' => 'schoolyears.index',
                 'permission' => 'view school years',
                 'child' => true,
             ],

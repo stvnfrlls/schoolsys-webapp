@@ -252,10 +252,48 @@
 
                 {{-- Section: Enrollment Status --}}
                 <div class="pb-4">
-                    <div class="py-3 border-b border-slate-100 mb-4">
+                    <div class="pb-4 border-b border-slate-100 mb-4">
                         <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-widest font-sans">Enrollment
-                            Status</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Current academic standing of the student</p>
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Assign the student to a school year and section</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4">
+                        <div>
+                            <label for="school_year_id" class="block text-sm font-medium text-slate-700 mb-2">
+                                School Year <span class="text-red-500">*</span>
+                            </label>
+                            <select id="school_year_id" name="school_year_id"
+                                class="w-full px-4 py-2 text-sm border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-school-600 focus:border-school-600 @error('school_year_id') border-red-500 @enderror">
+                                <option value="">-- Select School Year --</option>
+                                @foreach ($schoolYears as $sy)
+                                    <option value="{{ $sy->id }}" {{ old('school_year_id') == $sy->id ? 'selected' : '' }}>
+                                        {{ $sy->label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('school_year_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="section_id" class="block text-sm font-medium text-slate-700 mb-2">
+                                Grade Level & Section <span class="text-red-500">*</span>
+                            </label>
+                            <select id="section_id" name="section_id"
+                                class="w-full px-4 py-2 text-sm border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-school-600 focus:border-school-600 @error('section_id') border-red-500 @enderror">
+                                <option value="">-- Select Section --</option>
+                                @foreach ($sections as $section)
+                                    <option value="{{ $section->id }}" {{ old('section_id') == $section->id ? 'selected' : '' }}>
+                                        {{ $section->gradeLevel->name ?? 'No Grade' }} — {{ $section->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('section_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                     <div>
@@ -265,12 +303,11 @@
                         <select id="status" name="status"
                             class="w-full px-4 py-2 text-sm border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-school-600 focus:border-school-600 @error('status') border-red-500 @enderror">
                             <option value="">-- Select Status --</option>
-                            <option value="enrolled" {{ old('status', 'enrolled') === 'enrolled' ? 'selected' : '' }}>
-                                Enrolled</option>
+                            <option value="active" {{ old('status', 'active') === 'active' ? 'selected' : '' }}>Active
+                            </option>
                             <option value="graduated" {{ old('status') === 'graduated' ? 'selected' : '' }}>Graduated
                             </option>
-                            <option value="dropped" {{ old('status') === 'dropped' ? 'selected' : '' }}>Dropped</option>
-                            <option value="transferee" {{ old('status') === 'transferee' ? 'selected' : '' }}>Transferee
+                            <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive
                             </option>
                         </select>
                         @error('status')

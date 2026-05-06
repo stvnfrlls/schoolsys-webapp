@@ -28,8 +28,7 @@ return new class extends Migration
             $table->string('guardian_contact')->nullable();
             $table->string('guardian_relationship')->nullable();
 
-            $table->enum('status', ['enrolled', 'graduated', 'dropped', 'transferee'])
-                ->default('enrolled');
+            $table->enum('status', ['active', 'graduated', 'inactive'])->default('active');
 
             $table->softDeletes();
             $table->timestamps();
