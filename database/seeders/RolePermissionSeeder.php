@@ -78,6 +78,12 @@ class RolePermissionSeeder extends Seeder
             'create school years',
             'edit school years',
             'delete school years',
+
+            // Faculty
+            'view faculty',
+            'create faculty',
+            'edit faculty',
+            'delete faculty',
         ];
 
         foreach ($permissions as $permission) {

@@ -10,6 +10,7 @@ use App\Http\Controllers\Curriculum\SchoolYearController;
 use App\Http\Controllers\Curriculum\SectionController;
 use App\Http\Controllers\Curriculum\SubjectController;
 use App\Http\Controllers\Curriculum\SubjectPerLevelController;
+use App\Http\Controllers\User\FacultyController;
 use App\Http\Controllers\User\StudentController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('students', StudentController::class);
     Route::resource('enrollments', EnrollmentController::class);
     Route::resource('schoolyears', SchoolYearController::class);
+    Route::resource('faculty', FacultyController::class);
 });
 
 require __DIR__ . '/auth.php';
