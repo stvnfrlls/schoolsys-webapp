@@ -127,7 +127,13 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        return view('students.show', compact('student'));
+        $student->load('enrollment.schoolYear', 'enrollment.section.gradeLevel', 'user');
+
+        return view('students.show', [
+            'student'     => $student,
+            'schoolYears' => SchoolYear::orderByDesc('start_date')->get(),
+            'sections'    => Section::with('gradeLevel')->orderBy('name')->get(),
+        ]);
     }
 
     /**
