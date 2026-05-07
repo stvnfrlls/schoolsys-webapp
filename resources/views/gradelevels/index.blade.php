@@ -4,9 +4,12 @@
 
     {{-- Flash messages --}}
     @if (session('success'))
-        <div class="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl px-4 py-3 mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        <div
+            class="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-xl px-4 py-3 mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-500 shrink-0" fill="none"
+                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             {{ session('success') }}
         </div>
@@ -14,8 +17,10 @@
 
     @if (session('error'))
         <div class="flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3 mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24"
+                stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
             </svg>
             {{ session('error') }}
         </div>
@@ -36,10 +41,11 @@
 
                 <a href="{{ route('gradelevels.create') }}"
                     class="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg bg-school-800 text-white hover:bg-school-700 transition-colors whitespace-nowrap">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                        stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    <span class="hidden sm:inline">New Grade Level</span>
+                    <span class="max-sm:hidden">New Grade Level</span>
                     <span class="sm:hidden">New</span>
                 </a>
             </div>
@@ -50,14 +56,13 @@
 
                     <div class="relative flex-1 md:flex-none">
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" fill="none"
+                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                             </svg>
                         </div>
-                        <input
-                            id="gradelevels-search"
-                            type="text"
-                            placeholder="Search grade levels..."
+                        <input id="gradelevels-search" type="text" placeholder="Search grade levels..."
                             class="pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-school-600 focus:border-school-600 w-full md:w-36 lg:w-56">
                     </div>
 
@@ -93,6 +98,7 @@
                 color: #64748b;
                 white-space: nowrap;
             }
+
             #gradelevels-table_length label {
                 display: flex;
                 align-items: center;
@@ -232,6 +238,7 @@
                 #gradelevels-table_paginate {
                     justify-content: flex-end;
                 }
+
                 #gradelevels-table_length {
                     justify-content: flex-start;
                 }
@@ -332,8 +339,8 @@
         {{ $dataTable->scripts(attributes: ['type' => 'module']) }}
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                $('#gradelevels-table').on('init.dt', function() {
+            document.addEventListener('DOMContentLoaded', function () {
+                $('#gradelevels-table').on('init.dt', function () {
                     const table = $('#gradelevels-table').DataTable();
 
                     // Move length select into search-export row

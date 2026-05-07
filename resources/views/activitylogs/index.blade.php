@@ -388,7 +388,7 @@
                         }
 
                         const pills = items.map(v =>
-                            `<span style="font-size:12px;padding:3px 10px;border-radius:999px;background:${pillBg};color:${pillColor};">${v}</span>`
+                            `<span style="font-size:12px;padding:3px 10px;background:${pillBg};color:${pillColor};">${v}</span>`
                         ).join('');
 
                         return `<div style="background:#f8fafc;border-radius:8px;border:1px solid #f1f5f9;padding:12px;margin-bottom:8px;">

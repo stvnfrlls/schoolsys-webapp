@@ -35,7 +35,8 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-sm font-semibold text-slate-800 font-sans">All Subject Assignments</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Subjects assigned to grade levels with hours per week and status</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Subjects assigned to grade levels with hours per week and
+                        status</p>
                 </div>
 
                 <a href="{{ route('subjectperlevel.create') }}"
@@ -44,7 +45,7 @@
                         stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    <span class="hidden sm:inline">Assign Subject</span>
+                    <span class="max-sm:hidden">Assign Subject</span>
                     <span class="sm:hidden">Assign</span>
                 </a>
             </div>
@@ -223,6 +224,7 @@
             }
 
             @media (min-width: 640px) {
+
                 table.dataTable.dtr-inline.collapsed>tbody>tr>td.dtr-control,
                 table.dataTable.dtr-inline.collapsed>tbody>tr>th.dtr-control {
                     text-align: unset;
