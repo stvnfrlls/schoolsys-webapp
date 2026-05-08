@@ -38,8 +38,8 @@ return [
             ],
             [
                 'label' => 'Schedule',
-                'route' => 'schedule.index',
-                'permission' => 'view schedule',
+                'route' => 'schedules.index',
+                'permission' => 'view schedules',
                 'child' => true,
             ],
             [

@@ -18,7 +18,14 @@ class FacultyFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'employee_number' => $this->faker->unique()->numerify('EMP-####'),
+            'first_name'      => $this->faker->firstName(),
+            'middle_name'     => $this->faker->optional()->lastName(),
+            'last_name'       => $this->faker->lastName(),
+            'birth_date'      => $this->faker->date(),
+            'gender'          => $this->faker->randomElement(['male', 'female']),
+            'employment_type' => 'full_time',
+            'status'          => 'active',
         ];
     }
 }
