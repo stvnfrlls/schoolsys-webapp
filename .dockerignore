@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────
+# Exclude from Docker build context
+# ─────────────────────────────────────────────
+
+# Dependencies (installed inside container)
+vendor/
+node_modules/
+
+# Laravel runtime & cache
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+
+# Dev & CI artifacts
+.git/
+.github/
+.idea/
+.vscode/
+tests/
+
+# Sensitive / local config
+.env
+.env.*
+!.env.example
+
+# Build output
+public/build/
+public/hot
