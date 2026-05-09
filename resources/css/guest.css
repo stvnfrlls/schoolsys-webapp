@@ -1,0 +1,98 @@
+.guest-canvas {
+    background: #040d1a;
+    min-height: calc(100vh - 64px);
+    position: relative;
+    overflow: hidden;
+}
+
+.guest-canvas .dot-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+}
+
+.guest-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    animation: guestOrbFloat 14s ease-in-out infinite;
+}
+
+.guest-orb-1 {
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.18) 0%, transparent 70%);
+    top: -160px;
+    left: -100px;
+    animation-delay: 0s;
+}
+
+.guest-orb-2 {
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.13) 0%, transparent 70%);
+    bottom: -120px;
+    right: -80px;
+    animation-delay: -6s;
+}
+
+.guest-orb-3 {
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.10) 0%, transparent 70%);
+    top: 40%;
+    left: 55%;
+    animation-delay: -11s;
+}
+
+@keyframes guestOrbFloat {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(24px, -32px) scale(1.04);
+    }
+
+    66% {
+        transform: translate(-16px, 20px) scale(0.97);
+    }
+}
+
+.guest-canvas::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.40), transparent);
+    z-index: 1;
+}
+
+.guest-canvas::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.40;
+    z-index: 1;
+}
+
+.guest-canvas>.guest-slot {
+    position: relative;
+    z-index: 2;
+}
+
+.nav-dark {
+    background: rgba(4, 13, 26, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}

@@ -1,0 +1,327 @@
+ /* ── Animated gradient orbs ── */
+ .orb {
+     position: absolute;
+     border-radius: 50%;
+     filter: blur(90px);
+     pointer-events: none;
+     animation: orbFloat 12s ease-in-out infinite;
+ }
+
+ .orb-1 {
+     width: 520px;
+     height: 520px;
+     background: radial-gradient(circle, rgba(14, 165, 233, 0.20) 0%, transparent 70%);
+     top: -140px;
+     left: -120px;
+     animation-delay: 0s;
+ }
+
+ .orb-2 {
+     width: 420px;
+     height: 420px;
+     background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+     bottom: -100px;
+     right: -80px;
+     animation-delay: -5s;
+ }
+
+ .orb-3 {
+     width: 280px;
+     height: 280px;
+     background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
+     top: 38%;
+     left: 58%;
+     animation-delay: -9s;
+ }
+
+ @keyframes orbFloat {
+
+     0%,
+     100% {
+         transform: translate(0, 0) scale(1);
+     }
+
+     33% {
+         transform: translate(28px, -36px) scale(1.05);
+     }
+
+     66% {
+         transform: translate(-18px, 22px) scale(0.97);
+     }
+ }
+
+ /* ── Dot grid ── */
+ .dot-grid {
+     background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+     background-size: 28px 28px;
+ }
+
+ /* ── Gradient text ── */
+ .gradient-text {
+     background: linear-gradient(135deg, #fff 20%, #38bdf8 60%, #818cf8 100%);
+     -webkit-background-clip: text;
+     -webkit-text-fill-color: transparent;
+     background-clip: text;
+ }
+
+ .gradient-text-sky {
+     background: linear-gradient(90deg, #38bdf8, #818cf8);
+     -webkit-background-clip: text;
+     -webkit-text-fill-color: transparent;
+     background-clip: text;
+ }
+
+ /* ── Badge pulse dot ── */
+ .badge-dot {
+     width: 6px;
+     height: 6px;
+     border-radius: 50%;
+     background: #38bdf8;
+     animation: pulseDot 2s ease-in-out infinite;
+ }
+
+ @keyframes pulseDot {
+
+     0%,
+     100% {
+         opacity: 1;
+         transform: scale(1);
+     }
+
+     50% {
+         opacity: 0.5;
+         transform: scale(1.6);
+     }
+ }
+
+ /* ── Hero CTA shimmer ── */
+ .btn-primary {
+     position: relative;
+     overflow: hidden;
+     background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+     transition: transform 0.2s, box-shadow 0.2s;
+ }
+
+ .btn-primary::after {
+     content: '';
+     position: absolute;
+     inset: 0;
+     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+     transform: translateX(-100%);
+     transition: transform 0.5s ease;
+ }
+
+ .btn-primary:hover {
+     transform: translateY(-1px);
+     box-shadow: 0 14px 42px rgba(14, 165, 233, 0.38);
+ }
+
+ .btn-primary:hover::after {
+     transform: translateX(100%);
+ }
+
+ /* ── Feature card mouse-beam ── */
+ .feature-card {
+     position: relative;
+     overflow: hidden;
+     transition: transform 0.25s, box-shadow 0.25s;
+ }
+
+ .feature-card::before {
+     content: '';
+     position: absolute;
+     inset: 0;
+     background: radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%), rgba(14, 165, 233, 0.07), transparent 60%);
+     opacity: 0;
+     transition: opacity 0.3s;
+     pointer-events: none;
+ }
+
+ .feature-card:hover::before {
+     opacity: 1;
+ }
+
+ .feature-card:hover {
+     transform: translateY(-3px);
+     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+ }
+
+ /* ── Scroll reveal ── */
+ .reveal {
+     opacity: 0;
+     transform: translateY(26px);
+     transition: opacity 0.6s ease, transform 0.6s ease;
+ }
+
+ .reveal.visible {
+     opacity: 1;
+     transform: translateY(0);
+ }
+
+ /* ── Floating role pills ── */
+ @keyframes floatUp {
+
+     0%,
+     100% {
+         transform: translateY(0);
+     }
+
+     50% {
+         transform: translateY(-6px);
+     }
+ }
+
+ .float-a {
+     animation: floatUp 4s ease-in-out infinite;
+ }
+
+ .float-b {
+     animation: floatUp 5s ease-in-out infinite;
+     animation-delay: -2s;
+ }
+
+ .role-pill {
+     display: inline-flex;
+     align-items: center;
+     gap: 8px;
+     padding: 6px 14px;
+     border-radius: 12px;
+     font-size: 12px;
+     font-weight: 600;
+     color: #ffffff;
+     background: rgba(255, 255, 255, 0.13);
+     border: 1px solid rgba(255, 255, 255, 0.26);
+     backdrop-filter: blur(12px);
+     -webkit-backdrop-filter: blur(12px);
+     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+     letter-spacing: 0.01em;
+ }
+
+ .role-pill-dot {
+     width: 8px;
+     height: 8px;
+     border-radius: 50%;
+     flex-shrink: 0;
+     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+ }
+
+ /* ── Hero section ── */
+ .hero-section {
+     background: #040d1a;
+     min-height: calc(100vh - 64px);
+     display: flex;
+     align-items: flex-start;
+     padding-top: 10rem;
+     position: relative;
+     overflow: hidden;
+ }
+
+ .hero-section::before {
+     content: '';
+     position: absolute;
+     top: 0;
+     left: 0;
+     right: 0;
+     height: 1px;
+     background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.45), transparent);
+ }
+
+
+ /* ── Role chip badges ── */
+ .role-chip {
+     display: inline-flex;
+     align-items: center;
+     gap: 6px;
+     padding: 4px 12px;
+     border-radius: 999px;
+     font-size: 11px;
+     font-weight: 700;
+     letter-spacing: 0.06em;
+     text-transform: uppercase;
+ }
+
+ .chip-admin {
+     background: #ede9fe;
+     color: #5b21b6;
+ }
+
+ .chip-faculty {
+     background: #fef3c7;
+     color: #92400e;
+ }
+
+ .chip-student {
+     background: #dcfce7;
+     color: #14532d;
+ }
+
+ /* ── Step timeline line ── */
+ .step-line {
+     position: absolute;
+     left: 23px;
+     top: 52px;
+     bottom: -12px;
+     width: 2px;
+     background: linear-gradient(to bottom, #cbd5e1, transparent);
+ }
+
+ /* ── CTA section ── */
+ .cta-section {
+     background: linear-gradient(135deg, #040d1a 0%, #071224 50%, #0d1f3c 100%);
+     position: relative;
+     overflow: hidden;
+ }
+
+ .cta-orb {
+     position: absolute;
+     width: 560px;
+     height: 560px;
+     border-radius: 50%;
+     background: radial-gradient(circle, rgba(14, 165, 233, 0.13) 0%, transparent 70%);
+     filter: blur(60px);
+     top: -180px;
+     left: 50%;
+     transform: translateX(-50%);
+     pointer-events: none;
+ }
+
+ /* ── Noise overlay ── */
+ .noise-overlay::after {
+     content: '';
+     position: absolute;
+     inset: 0;
+     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+     pointer-events: none;
+     opacity: 0.45;
+ }
+
+ .display-font {
+     font-family: 'Merriweather', serif;
+ }
+
+ /* ── Stat accent lines ── */
+ .acc-sky {
+     background: #38bdf8;
+ }
+
+ .acc-violet {
+     background: #818cf8;
+ }
+
+ .acc-emerald {
+     background: #34d399;
+ }
+
+ .acc-amber {
+     background: #fbbf24;
+ }
+
+ .feature-card-inner {
+     display: flex;
+     flex-direction: column;
+     height: 100%;
+ }
+
+ .feature-card-inner p {
+     flex-grow: 1;
+ }

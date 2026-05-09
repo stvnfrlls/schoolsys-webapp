@@ -34,7 +34,7 @@
 
             {{-- Header --}}
             <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-                <div>
+                <div class="min-w-0">
                     <h2 class="text-sm font-semibold text-slate-800 font-sans">
                         Edit Permission
                     </h2>
@@ -43,14 +43,14 @@
                     </p>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-shrink-0">
                     <a href="{{ route('permissions.index') }}"
                         class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 transition">
                         Back
                     </a>
-                    <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition">
-                        Save
+                    <button type="submit" type="submit"
+                        class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-school-800 text-white hover:bg-school-700 transition-colors">
+                        Save Changes
                     </button>
                 </div>
             </div>
