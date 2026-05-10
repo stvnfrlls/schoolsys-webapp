@@ -19,7 +19,7 @@ RUN composer dump-autoload --optimize --classmap-authoritative
 # ─────────────────────────────────────────────
 # Stage 2: Final image
 # ─────────────────────────────────────────────
-FROM php:8.2-fpm
+FROM php:8.4-fpm
 
 # Install system dependencies + Nginx + Supervisor
 RUN apt-get update && apt-get install -y \
