@@ -1,46 +1,77 @@
-FROM php:8.4-fpm
+# ─────────────────────────────────────────────
+# Stage 1: Composer dependencies
+# ─────────────────────────────────────────────
+FROM composer:2 AS vendor
+
+WORKDIR /app
+
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist \
+    --ignore-platform-reqs
+
+COPY . .
+RUN composer dump-autoload --optimize --classmap-authoritative
 
 # ─────────────────────────────────────────────
-# System dependencies
+# Stage 2: Final image
 # ─────────────────────────────────────────────
+FROM php:8.2-fpm
+
+# Install system dependencies + Nginx + Supervisor
 RUN apt-get update && apt-get install -y \
-    git curl libpng-dev libonig-dev libxml2-dev \
-    libpq-dev libzip-dev zip unzip \
+    nginx \
+    supervisor \
+    git \
+    curl \
+    zip \
+    unzip \
+    gettext-base \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libpq-dev \
+    libzip-dev \
     && docker-php-ext-install \
-    pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    pdo \
+    pdo_mysql \
+    pdo_pgsql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    zip \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && rm -rf /var/lib/apt/lists/*
 
-# ─────────────────────────────────────────────
-# Redis extension via PECL
-# ─────────────────────────────────────────────
-RUN pecl install redis && docker-php-ext-enable redis
-
-# ─────────────────────────────────────────────
-# Composer
-# ─────────────────────────────────────────────
-COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
-
-# ─────────────────────────────────────────────
-# PHP config overrides
-# ─────────────────────────────────────────────
-COPY docker/php/local.ini /usr/local/etc/php/conf.d/local.ini
-
-# ─────────────────────────────────────────────
-# Install Composer dependencies at build time
-# ─────────────────────────────────────────────
 WORKDIR /var/www/html
 
-# Copy only composer files first — maximizes Docker layer cache
-# (vendor only rebuilds when composer.json/lock actually changes)
-COPY --chown=www-data:www-data composer.json composer.lock ./
+# Copy app + vendor from build stage
+COPY --from=vendor /app /var/www/html
 
-RUN composer install --no-interaction --no-scripts --no-autoloader --prefer-dist
+# Set correct permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Copy the rest of the application
-COPY --chown=www-data:www-data . .
+# ── Nginx ──────────────────────────────────────
+# Remove default nginx site; copy ours as a template
+#  (envsubst will replace $PORT at runtime)
+RUN rm -f /etc/nginx/sites-enabled/default
+COPY docker/nginx/default.conf.template /etc/nginx/conf.d/default.conf.template
 
-# Generate the optimized autoloader now that all files are present
-RUN composer dump-autoload --optimize
+# ── Supervisor ─────────────────────────────────
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+# ── Entrypoint ─────────────────────────────────
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["/entrypoint.sh"]
