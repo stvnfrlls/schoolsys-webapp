@@ -24,23 +24,6 @@ services:
       - laravel
 
   # ─────────────────────────────────────────────
-  # Vite Dev Server
-  # ─────────────────────────────────────────────
-  vite:
-    image: node:20-alpine
-    container_name: schoolsys_vite
-    restart: unless-stopped
-    working_dir: /var/www/html
-    volumes:
-      - .:/var/www/html
-      - /var/www/html/node_modules
-    ports:
-      - "5173:5173"
-    command: sh -c "npm install && npm run dev -- --host"
-    networks:
-      - laravel
-
-  # ─────────────────────────────────────────────
   # Nginx
   # ─────────────────────────────────────────────
   nginx:
@@ -65,16 +48,16 @@ services:
     container_name: schoolsys_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root_secret
-      MYSQL_DATABASE: schoolsys_db
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: ${DB_ROOTPASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "laravel", "-psecret"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USERNAME}", "-p${DB_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -89,15 +72,15 @@ services:
     container_name: schoolsys_pgsql
     restart: unless-stopped
     environment:
-      POSTGRES_DB: laravel
-      POSTGRES_USER: laravel
-      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - pgsql_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U laravel"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
