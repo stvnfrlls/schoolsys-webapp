@@ -22,7 +22,18 @@ echo "==> Nginx config written"
 # ─────────────────────────────────────────────
 cd /var/www/html
 
-# Generate app key if not set
+# Render has no .env file — env vars are injected at runtime.
+# Laravel's artisan needs a .env to exist, so we generate one.
+if [ ! -f .env ]; then
+    echo "==> Creating .env from runtime environment..."
+    printenv \
+        | grep -E '^(APP_|DB_|REDIS_|CACHE_|SESSION_|QUEUE_|MAIL_|AWS_|LOG_|BROADCAST_)' \
+        | sed "s/=\(.*\)/='\1'/" \
+        > .env
+    echo "==> .env written"
+fi
+
+# Generate app key only if APP_KEY is missing
 if [ -z "$APP_KEY" ]; then
     echo "==> Generating APP_KEY..."
     php artisan key:generate --force
@@ -36,7 +47,7 @@ if [ "$APP_ENV" = "production" ]; then
     php artisan view:cache
 fi
 
-# Run migrations (add --force so it runs non-interactively in production)
+# Run migrations (--force skips interactive confirmation)
 echo "==> Running migrations..."
 php artisan migrate --force
 
