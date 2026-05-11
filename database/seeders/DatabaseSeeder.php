@@ -19,10 +19,12 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
         ]);
 
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password'),
-        ])->assignRole('Admin');
+        if (!app()->isProduction()) {
+            User::factory()->create([
+                'name' => 'Admin',
+                'email' => 'admin@example.com',
+                'password' => bcrypt('password'),
+            ])->assignRole('Admin');
+        }
     }
 }
