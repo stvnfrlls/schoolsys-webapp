@@ -20,6 +20,6 @@ class AccountSeeder extends Seeder
             ]
         );
 
-        $admin->assignRole('admin');
+        $admin->assignRole('Admin');
     }
 }
