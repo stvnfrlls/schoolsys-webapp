@@ -1,77 +1,41 @@
 services:
-  # ─────────────────────────────────────────────
-  # Laravel Web App (Nginx + PHP-FPM in one container)
-  # ─────────────────────────────────────────────
   - type: web
-    name: schoolsys-app
+    name: laravel-app
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: starter # change to standard/pro as needed
-    healthCheckPath: / # adjust to a real health endpoint if you have one
-
+    plan: starter
     envVars:
       - key: APP_ENV
         value: production
+      - key: APP_KEY
+        generateValue: true
       - key: APP_DEBUG
         value: false
-      - key: APP_KEY
-        generateValue: true # Render auto-generates a secure value
-
-      # ── Database ── Set these in Render Dashboard or use managed DBs below
       - key: DB_CONNECTION
-        value: pgsql # or mysql
+        value: pgsql
       - key: DB_HOST
-        fromService:
-          type: pgsql
-          name: schoolsys-db
+        fromDatabase:
+          name: laravel-db
           property: host
       - key: DB_PORT
-        fromService:
-          type: pgsql
-          name: schoolsys-db
+        fromDatabase:
+          name: laravel-db
           property: port
       - key: DB_DATABASE
-        fromService:
-          type: pgsql
-          name: schoolsys-db
+        fromDatabase:
+          name: laravel-db
           property: database
       - key: DB_USERNAME
-        fromService:
-          type: pgsql
-          name: schoolsys-db
+        fromDatabase:
+          name: laravel-db
           property: user
       - key: DB_PASSWORD
-        fromService:
-          type: pgsql
-          name: schoolsys-db
+        fromDatabase:
+          name: laravel-db
           property: password
 
-      # ── Redis ──
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: schoolsys-redis
-          property: connectionString
-      - key: CACHE_DRIVER
-        value: redis
-      - key: SESSION_DRIVER
-        value: redis
-      - key: QUEUE_CONNECTION
-        value: redis
-
-  # ─────────────────────────────────────────────
-  # Managed PostgreSQL
-  # ─────────────────────────────────────────────
-  - type: pgsql
-    name: schoolsys-db
+databases:
+  - name: laravel-db
     plan: starter
-    databaseName: schoolsys
-    user: schoolsys
-
-  # ─────────────────────────────────────────────
-  # Managed Redis
-  # ─────────────────────────────────────────────
-  - type: redis
-    name: schoolsys-redis
-    plan: starter
-    ipAllowList: [] # only allow internal access
+    databaseName: laravel
+    user: laravel
