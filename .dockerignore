@@ -29,3 +29,4 @@ README.md
 tests/
 .phpunit.cache
 coverage/
+public/storage
