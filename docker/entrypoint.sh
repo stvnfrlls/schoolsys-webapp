@@ -1,12 +1,22 @@
 #!/bin/sh
 set -e
 
-# Fix CRLF line endings and generate APP_KEY if missing
-sed -i 's/\r//' .env
-if [ -z "$(grep '^APP_KEY=.\+' .env)" ]; then
-    echo "Generating APP_KEY..."
-    php artisan key:generate --force
+# Fix CRLF line endings and generate APP_KEY if missing (local only)
+if [ "$APP_ENV" = "local" ]; then
+    sed -i 's/\r//' .env
+    if [ -z "$(grep '^APP_KEY=.\+' .env)" ]; then
+        echo "Generating APP_KEY..."
+        php artisan key:generate --force
+    fi
 fi
+
+# Wait for PostgreSQL to be ready
+echo "Waiting for database connection..."
+until php artisan db:monitor > /dev/null 2>&1; do
+    echo "Database not ready, retrying in 2s..."
+    sleep 2
+done
+echo "Database is ready."
 
 echo "Linking storage..."
 php artisan storage:link --force

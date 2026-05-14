@@ -43,6 +43,25 @@ COPY docker/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 
+# Fix nginx directory permissions for non-root user
+RUN mkdir -p /var/lib/nginx/logs \
+    /var/lib/nginx/tmp/client_body \
+    /var/lib/nginx/tmp/proxy \
+    /var/lib/nginx/tmp/fastcgi \
+    /var/log/nginx \
+    /run/nginx \
+    && chown -R ${UID:-1000}:${GID:-1000} \
+    /var/lib/nginx \
+    /var/log/nginx \
+    /run/nginx \
+    /etc/nginx
+
+COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+
+RUN mkdir -p /var/log/nginx \
+    && chown -R ${UID:-1000}:${GID:-1000} /var/log/nginx
+
 RUN mkdir -p storage/framework/{sessions,views,cache} \
     storage/logs \
     bootstrap/cache \
