@@ -8,15 +8,10 @@ services:
     volumes:
       - .:/var/www/html
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    env_file:
+      - .env
     environment:
-      APP_ENV: local
-      APP_DEBUG: true
-      DB_CONNECTION: pgsql
       DB_HOST: pgsql
-      DB_PORT: 5432
-      DB_DATABASE: ${DB_DATABASE:-laravel}
-      DB_USERNAME: ${DB_USERNAME:-laravel}
-      DB_PASSWORD: ${DB_PASSWORD:-secret}
       REDIS_HOST: redis
       REDIS_PORT: 6379
     depends_on:
