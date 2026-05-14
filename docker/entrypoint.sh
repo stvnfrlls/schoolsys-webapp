@@ -1,6 +1,13 @@
 #!/bin/sh
 set -e
 
+# Fix CRLF line endings and generate APP_KEY if missing
+sed -i 's/\r//' .env
+if [ -z "$(grep '^APP_KEY=.\+' .env)" ]; then
+    echo "Generating APP_KEY..."
+    php artisan key:generate --force
+fi
+
 echo "Linking storage..."
 php artisan storage:link --force
 
