@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- Favicon --}}
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='24' height='24' rx='5' fill='%231e3a5f'/%3E%3Crect x='2.5' y='14.5' width='19' height='3.5' rx='1.5' fill='white' opacity='0.45'/%3E%3Crect x='2.5' y='10' width='19' height='3.5' rx='1.5' fill='white' opacity='0.70'/%3E%3Crect x='2.5' y='5.5' width='19' height='3.5' rx='1.5' fill='white'/%3E%3Ccircle cx='18.5' cy='7.25' r='2' fill='none' stroke='%230ea5e9' stroke-width='1.5'/%3E%3C/svg%3E">
+
     <title>{{ config('app.name', 'SchoolSys') }} — @yield('title', 'Dashboard')</title>
 
     <!-- Fonts -->
