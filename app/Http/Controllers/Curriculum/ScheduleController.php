@@ -11,6 +11,7 @@ use App\Models\Schedule;
 use App\Models\SchoolYear;
 use App\Models\Section;
 use App\Models\Subject;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -213,6 +214,45 @@ class ScheduleController extends Controller
                 ->route('schedules.index')
                 ->with('error', 'Failed to delete schedule. Please try again.');
         }
+    }
+
+    public function timetable(Request $request)
+    {
+        $schoolYears = SchoolYear::orderByDesc('name')->get();
+        $sections    = Section::with('gradeLevel')->orderBy('grade_level_id')->orderBy('name')->get();
+
+        $selectedYear    = $request->input('school_year_id', $schoolYears->first()?->id);
+        $selectedSection = $request->input('section_id', $sections->first()?->id);
+
+        $schedules = Schedule::with(['faculty', 'subject'])
+            ->where('school_year_id', $selectedYear)
+            ->where('section_id', $selectedSection)
+            ->orderBy('day_of_week')
+            ->orderBy('time_start')
+            ->get();
+
+        // Key by day_of_week (1–6) directly — it's already the integer order
+        $timetable = [];
+        foreach ($schedules as $schedule) {
+            // Use time_start as the slot key so blade lookup matches $slot['start']
+            $timetable[$schedule->day_of_week][$schedule->time_start] = $schedule;
+        }
+
+        // Unique time slots, sorted ascending
+        $timeSlots = $schedules
+            ->map(fn($s) => ['start' => $s->time_start, 'end' => $s->time_end])
+            ->unique('start')
+            ->sortBy('start')
+            ->values();
+
+        return view('schedules.timetable', compact(
+            'schoolYears',
+            'sections',
+            'timetable',
+            'timeSlots',
+            'selectedYear',
+            'selectedSection'
+        ));
     }
 
     /**

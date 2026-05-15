@@ -32,7 +32,7 @@
         {{-- Card header --}}
         <div class="flex flex-col gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-slate-100">
 
-            {{-- Title + Create button row --}}
+            {{-- Title + Action buttons row --}}
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-sm font-semibold text-slate-800 font-sans">All Schedules</h2>
@@ -40,15 +40,29 @@
                         faculty</p>
                 </div>
 
-                <a href="{{ route('schedules.create') }}"
-                    class="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg bg-school-800 text-white hover:bg-school-700 transition-colors whitespace-nowrap">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                        stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    <span class="max-sm:hidden">New Schedule</span>
-                    <span class="sm:hidden">New</span>
-                </a>
+                <div class="flex items-center gap-2">
+                    {{-- Timetable view toggle --}}
+                    <a href="{{ route('schedules.timetable') }}"
+                        class="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors whitespace-nowrap">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                        </svg>
+                        <span class="max-sm:hidden">Timetable</span>
+                    </a>
+
+                    {{-- New Schedule --}}
+                    <a href="{{ route('schedules.create') }}"
+                        class="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg bg-school-800 text-white hover:bg-school-700 transition-colors whitespace-nowrap">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                            stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        <span class="max-sm:hidden">New Schedule</span>
+                        <span class="sm:hidden">New</span>
+                    </a>
+                </div>
             </div>
 
             {{-- Search + Export row --}}
@@ -153,6 +167,13 @@
                 border-bottom: none !important;
                 white-space: nowrap;
                 text-align: center;
+            }
+
+            table.schedules-dt tbody td:nth-child(3) {
+                max-width: 160px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
 
             table.schedules-dt tbody tr {
@@ -328,34 +349,26 @@
         {{ $dataTable->scripts(attributes: ['type' => 'module']) }}
 
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                $('#schedules-table').on('init.dt', function () {
-                    const table = $('#schedules-table').DataTable();
+            $(document).on('init.dt', '#schedules-table', function () {
+                const table = $('#schedules-table').DataTable();
 
-                    const $length = $('#schedules-table_length').detach();
-                    $('#search-export-row').prepend($length);
+                const $length = $('#schedules-table_length').detach();
+                $('#search-export-row').prepend($length);
 
-                    document.getElementById('schedules-search').addEventListener('input', function () {
-                        table.search(this.value).draw();
-                    });
-
-                    const buttons = new $.fn.dataTable.Buttons(table, {
-                        buttons: [
-                            {
-                                extend: 'excel',
-                                exportOptions: { columns: ':not(:last-child)' }
-                            },
-                            {
-                                extend: 'pdf',
-                                exportOptions: { columns: ':not(:last-child)' }
-                            }
-                        ]
-                    });
-
-                    const $btns = buttons.container().find('button');
-                    document.querySelector('[data-dt-button="excel"]').addEventListener('click', () => $btns.eq(0).click());
-                    document.querySelector('[data-dt-button="pdf"]').addEventListener('click', () => $btns.eq(1).click());
+                document.getElementById('schedules-search').addEventListener('input', function () {
+                    table.search(this.value).draw();
                 });
+
+                const buttons = new $.fn.dataTable.Buttons(table, {
+                    buttons: [
+                        { extend: 'excel', exportOptions: { columns: ':not(:last-child)' } },
+                        { extend: 'pdf', exportOptions: { columns: ':not(:last-child)' } }
+                    ]
+                });
+
+                const $btns = buttons.container().find('button');
+                document.querySelector('[data-dt-button="excel"]').addEventListener('click', () => $btns.eq(0).click());
+                document.querySelector('[data-dt-button="pdf"]').addEventListener('click', () => $btns.eq(1).click());
             });
         </script>
     @endpush

@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('schoolyears', SchoolYearController::class);
     Route::resource('faculty', FacultyController::class);
 
+    Route::get('schedules/timetable', [ScheduleController::class, 'timetable'])
+        ->name('schedules.timetable');
     Route::resource('schedules', ScheduleController::class);
 });
 

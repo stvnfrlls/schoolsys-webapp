@@ -9,6 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo as EloquentBelongsTo;
 
+/**
+ * @property string $day_name
+ * @property string $day_short
+ * @property int    $day_order
+ * @property string $time_start
+ * @property string $time_end
+ */
 class Schedule extends Model
 {
     use SoftDeletes, HasFactory;
@@ -79,6 +86,19 @@ class Schedule extends Model
             6 => 'Sat',
             7 => 'Sun',
             default => '???',
+        };
+    }
+
+    public function getDayOrderAttribute(): int
+    {
+        return match ($this->day_of_week) {
+            'monday'    => 1,
+            'tuesday'   => 2,
+            'wednesday' => 3,
+            'thursday'  => 4,
+            'friday'    => 5,
+            'saturday'  => 6,
+            default     => 7,
         };
     }
 
