@@ -21,21 +21,24 @@ class StudentDataTable extends DataTable
         return (new EloquentDataTable($query))
             ->filterColumn('full_name', function ($query, $keyword) {
                 $query->where(function ($q) use ($keyword) {
-                    $q->where('first_name', 'like', "%{$keyword}%")
-                        ->orWhere('last_name', 'like', "%{$keyword}%")
-                        ->orWhere('middle_name', 'like', "%{$keyword}%");
+                    $q->where('first_name', 'ilike', "%{$keyword}%")
+                        ->orWhere('last_name',   'ilike', "%{$keyword}%")
+                        ->orWhere('middle_name', 'ilike', "%{$keyword}%");
                 });
             })
             ->filterColumn(
                 'student_number',
                 fn($query, $keyword) =>
-                $query->where('student_number', 'like', "%{$keyword}%")
+                $query->where('student_number', 'ilike', "%{$keyword}%")
             )
             ->addColumn('full_name', fn(Student $student) => $student->full_name)
             ->editColumn('status', fn(Student $student) => view('components.status-badge', [
                 'status' => $student->status,
             ])->render())
             ->editColumn('created_at', fn(Student $student) => $student->created_at->format('M d, Y'))
+            ->filterColumn('created_at', function ($query, $keyword) {
+                $query->whereRaw("TO_CHAR(created_at, 'Mon DD, YYYY') ILIKE ?", ["%{$keyword}%"]);
+            })
             ->addColumn(
                 'action',
                 fn(Student $student) =>
@@ -111,7 +114,7 @@ class StudentDataTable extends DataTable
             Column::make('full_name')->title('Name'),
             Column::make('student_number')->title('Student No.'),
             Column::make('status')->title('Status')->searchable(false)->orderable(false),
-            Column::make('created_at')->title('Enrolled')->searchable(false),
+            Column::make('created_at')->title('Enrolled')->searchable(true),
             Column::computed('action')->title('Actions')->exportable(false)->printable(false)->searchable(false)->orderable(false),
         ];
     }

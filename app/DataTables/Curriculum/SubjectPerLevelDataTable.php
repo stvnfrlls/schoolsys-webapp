@@ -50,7 +50,7 @@ class SubjectPerLevelDataTable extends DataTable
 
             ->orderColumn('gradelevel_name', function ($query, $order) {
                 $query->orderByRaw("
-                    CAST(SUBSTRING_INDEX(grade_levels.name, ' ', -1) AS UNSIGNED) $order
+                    CAST(REVERSE(SPLIT_PART(REVERSE(grade_levels.name), ' ', 1)) AS INTEGER) $order
                 ");
             })
 
@@ -90,18 +90,12 @@ class SubjectPerLevelDataTable extends DataTable
             ->responsive([
                 'details' => [
                     'type'   => 'inline',
-                    'target' => 'td.dtr-control',
-                ],
+                    'target' => 'tr',
+                ]
             ])
-            ->buttons([
-                ['extend' => 'excel', 'exportOptions' => ['columns' => ':not(:last-child)']],
-                ['extend' => 'pdf',   'exportOptions' => ['columns' => ':not(:last-child)']],
-            ])
-            ->layout([
-                'topStart'    => 'length',
-                'topEnd'      => null,
-                'bottomStart' => 'info',
-                'bottomEnd'   => 'paging',
+            ->setTableAttribute('dom', 'lrtip')
+            ->parameters([
+                'lengthChange' => true,
             ])
             ->columnDefs([
                 ['responsivePriority' => 1, 'targets' => 0],  // Grade Level  — always visible
@@ -109,6 +103,12 @@ class SubjectPerLevelDataTable extends DataTable
                 ['responsivePriority' => 4, 'targets' => 2],  // Hours Per Week
                 ['responsivePriority' => 5, 'targets' => 3],  // Status
                 ['responsivePriority' => 2, 'targets' => 4],  // Action       — always visible
+            ])
+            ->layout([
+                'topStart'    => null,
+                'topEnd'      => null,
+                'bottomStart' => 'info',
+                'bottomEnd'   => 'paging',
             ])
             ->orderBy(0, 'asc')
             ->selectStyleSingle()
@@ -123,12 +123,13 @@ class SubjectPerLevelDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('gradelevel_name')->title('Grade Level'),
-            Column::make('subject_name')->title('Subject'),
+            Column::computed('gradelevel_name')->title('Grade Level')->searchable(true),
+            Column::computed('subject_name')->title('Subject')->searchable(true),
             Column::make('hours_per_week')->title('Hours Per Week'),
             Column::make('is_active')->title('Status'),
             Column::computed('action')
                 ->exportable(false)
+                ->searchable(false)
                 ->printable(false)
                 ->width(100)
                 ->addClass('text-center'),

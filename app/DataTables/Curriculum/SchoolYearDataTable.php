@@ -20,21 +20,33 @@ class SchoolYearDataTable extends DataTable
     {
         return (new EloquentDataTable($query))
             ->addColumn('name', fn(SchoolYear $schoolyear) => $schoolyear->name)
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('school_years.name', 'ilike', "%{$keyword}%");
+            })
             ->addColumn(
                 'start_date',
                 fn(SchoolYear $schoolyear) =>
                 $schoolyear->start_date->format('M d, Y')
             )
+            ->filterColumn('start_date', function ($query, $keyword) {
+                $query->whereRaw("TO_CHAR(start_date, 'Mon DD, YYYY') ILIKE ?", ["%{$keyword}%"]);
+            })
             ->addColumn(
                 'end_date',
                 fn(SchoolYear $schoolyear) =>
                 $schoolyear->end_date->format('M d, Y')
             )
+            ->filterColumn('end_date', function ($query, $keyword) {
+                $query->whereRaw("TO_CHAR(end_date, 'Mon DD, YYYY') ILIKE ?", ["%{$keyword}%"]);
+            })
             ->addColumn(
                 'is_active',
                 fn(SchoolYear $schoolyear) =>
                 view('components.status-badge', ['status' => $schoolyear->is_active])->render()
             )
+            ->filterColumn('is_active', function ($query, $keyword) {
+                $query->where('school_years.is_active', 'ilike', "%{$keyword}%");
+            })
             ->addColumn(
                 'created_at',
                 fn(SchoolYear $schoolyear) =>
@@ -111,14 +123,15 @@ class SchoolYearDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('name')->title('School Year'),
-            Column::make('start_date')->title('Start Date'),
-            Column::make('end_date')->title('End Date'),
-            Column::make('is_active')->title('Status'),
+            Column::computed('name')->title('School Year')->searchable(true),
+            Column::computed('start_date')->title('Start Date')->searchable(true),
+            Column::computed('end_date')->title('End Date')->searchable(true),
+            Column::computed('is_active')->title('Status')->searchable(true),
             Column::make('created_at')->title('Created At'),
             Column::computed('action')
                 ->title('Actions')
                 ->exportable(false)
+                ->searchable(false)
                 ->printable(false)
                 ->width(100)
                 ->addClass('text-center'),

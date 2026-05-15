@@ -349,9 +349,15 @@
         {{ $dataTable->scripts(attributes: ['type' => 'module']) }}
 
         <script>
-            $(document).on('init.dt', '#schedules-table', function () {
-                const table = $('#schedules-table').DataTable();
+            function waitForTable(id, callback) {
+                if (window.LaravelDataTables && window.LaravelDataTables[id]) {
+                    callback(window.LaravelDataTables[id]);
+                } else {
+                    setTimeout(() => waitForTable(id, callback), 50);
+                }
+            }
 
+            waitForTable('schedules-table', function (table) {
                 const $length = $('#schedules-table_length').detach();
                 $('#search-export-row').prepend($length);
 

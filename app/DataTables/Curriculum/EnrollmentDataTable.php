@@ -52,6 +52,21 @@ class EnrollmentDataTable extends DataTable
                     'param'        => $enrollment
                 ])->render()
             )
+            ->filterColumn('student', function ($query, $keyword) {
+                $query->whereRaw(
+                    "CONCAT(students.last_name, ' ', students.first_name) ILIKE ?",
+                    ["%{$keyword}%"]
+                );
+            })
+            ->filterColumn('section', function ($query, $keyword) {
+                $query->where('sections.name', 'ilike', "%{$keyword}%");
+            })
+            ->filterColumn('school_year', function ($query, $keyword) {
+                $query->where('school_years.name', 'ilike', "%{$keyword}%");
+            })
+            ->filterColumn('status', function ($query, $keyword) {
+                $query->where('enrollments.status', 'ilike', "%{$keyword}%");
+            })
             ->rawColumns(['status', 'action'])
             ->setRowId('id');
     }
@@ -63,12 +78,14 @@ class EnrollmentDataTable extends DataTable
      */
     public function query(Enrollment $model): QueryBuilder
     {
-        return $model->newQuery()->with(['student', 'section', 'schoolYear']);
+        return $model->newQuery()
+            ->with(['student', 'section', 'schoolYear'])
+            ->join('students', 'students.id', '=', 'enrollments.student_id')
+            ->join('sections', 'sections.id', '=', 'enrollments.section_id')
+            ->join('school_years', 'school_years.id', '=', 'enrollments.school_year_id')
+            ->select('enrollments.*');
     }
 
-    /**
-     * Optional method if you want to use the html builder.
-     */
     public function html(): HtmlBuilder
     {
         return $this->builder()
@@ -112,13 +129,14 @@ class EnrollmentDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('student')->title('Student')->orderable(false),
-            Column::make('section')->title('Section')->orderable(false),
-            Column::make('school_year')->title('School Year')->orderable(false),
-            Column::make('status')->title('Status'),
-            Column::make('enrolled_at')->title('Enrolled At'),
+            Column::computed('student')->title('Student')->searchable(true)->orderable(false),
+            Column::computed('section')->title('Section')->searchable(true)->orderable(false),
+            Column::computed('school_year')->title('School Year')->searchable(true)->orderable(false),
+            Column::computed('status')->title('Status')->searchable(true),
+            Column::computed('enrolled_at')->title('Enrolled At')->searchable(false),
             Column::computed('action')
                 ->title('Actions')
+                ->searchable(false)
                 ->exportable(false)
                 ->printable(false)
                 ->width(100)

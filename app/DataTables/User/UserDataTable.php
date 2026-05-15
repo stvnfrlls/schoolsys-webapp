@@ -6,10 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
-use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
-use Yajra\DataTables\Html\Editor\Editor;
-use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
 class UserDataTable extends DataTable
@@ -36,8 +33,7 @@ class UserDataTable extends DataTable
             )
             ->addColumn(
                 'created_at',
-                fn(User $user) =>
-                $user->created_at->format('M d, Y')
+                fn(User $user) => $user->created_at->format('M d, Y')
             )
             ->addColumn(
                 'action',
@@ -50,6 +46,22 @@ class UserDataTable extends DataTable
                     'param'        => $user
                 ])->render()
             )
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('users.name', 'ilike', "%{$keyword}%");
+            })
+            ->filterColumn('email', function ($query, $keyword) {
+                $query->where('users.email', 'ilike', "%{$keyword}%");
+            })
+            ->filterColumn('roles', function ($query, $keyword) {
+                $query->whereHas(
+                    'roles',
+                    fn($q) =>
+                    $q->where('name', 'ilike', "%{$keyword}%")
+                );
+            })
+            ->filterColumn('status', function ($query, $keyword) {
+                $query->where('users.status', 'ilike', "%{$keyword}%");
+            })
             ->rawColumns(['status', 'action'])
             ->setRowId('id');
     }
@@ -110,12 +122,18 @@ class UserDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('name')->title('Name'),
-            Column::make('email')->title('Email'),
-            Column::make('roles')->title('Roles'),
-            Column::make('status')->title('Status'),
-            Column::make('created_at')->title('Joined'),
-            Column::computed('action')->title('Actions')->exportable(false)->printable(false)->width(100)->addClass('text-center'),
+            Column::computed('name')->title('Name')->searchable(true),
+            Column::computed('email')->title('Email')->searchable(true),
+            Column::computed('roles')->title('Roles')->searchable(true)->orderable(false),
+            Column::computed('status')->title('Status')->searchable(true),
+            Column::computed('created_at')->title('Joined')->searchable(false),
+            Column::computed('action')
+                ->title('Actions')
+                ->searchable(false)
+                ->exportable(false)
+                ->printable(false)
+                ->width(100)
+                ->addClass('text-center'),
         ];
     }
 

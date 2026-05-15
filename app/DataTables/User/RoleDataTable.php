@@ -19,7 +19,7 @@ class RoleDataTable extends DataTable
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return (new EloquentDataTable($query))
-            ->filterColumn('name', fn($query, $keyword) => $query->where('name', 'like', "%{$keyword}%"))
+            ->filterColumn('name', fn($query, $keyword) => $query->where('name', 'ilike', "%{$keyword}%"))
             ->editColumn("permission_count", fn(Role $role) => $role->permission_count ?? 0)
             ->editColumn("user_count", fn(Role $role) => $role->user_count ?? 0)
             ->editColumn("created_at", fn(Role $role) => $role->created_at->format("M d, Y"))

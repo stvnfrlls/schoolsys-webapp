@@ -331,35 +331,32 @@
         {{ $dataTable->scripts(attributes: ['type' => 'module']) }}
 
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                $('#permissions-table').on('init.dt', function () {
-                    const table = $('#permissions-table').DataTable();
-                    const $length = $('#permissions-table_length').detach();
-                    $('#search-export-row').prepend($length);
+            function waitForTable(id, callback) {
+                if (window.LaravelDataTables && window.LaravelDataTables[id]) {
+                    callback(window.LaravelDataTables[id]);
+                } else {
+                    setTimeout(() => waitForTable(id, callback), 50);
+                }
+            }
 
-                    // Wire custom search input
-                    document.getElementById('permissions-search').addEventListener('input', function () {
-                        table.search(this.value).draw();
-                    });
+            waitForTable('permissions-table', function (table) {
+                const $length = $('#permissions-table_length').detach();
+                $('#search-export-row').prepend($length);
 
-                    // Export buttons
-                    const buttons = new $.fn.dataTable.Buttons(table, {
-                        buttons: [
-                            {
-                                extend: 'excel',
-                                exportOptions: { columns: ':not(:last-child)' }
-                            },
-                            {
-                                extend: 'pdf',
-                                exportOptions: { columns: ':not(:last-child)' }
-                            }
-                        ]
-                    });
-
-                    const $btns = buttons.container().find('button');
-                    document.querySelector('[data-dt-button="excel"]').addEventListener('click', () => $btns.eq(0).click());
-                    document.querySelector('[data-dt-button="pdf"]').addEventListener('click', () => $btns.eq(1).click());
+                document.getElementById('permissions-search').addEventListener('input', function () {
+                    table.search(this.value).draw();
                 });
+
+                const buttons = new $.fn.dataTable.Buttons(table, {
+                    buttons: [
+                        { extend: 'excel', exportOptions: { columns: ':not(:last-child)' } },
+                        { extend: 'pdf', exportOptions: { columns: ':not(:last-child)' } }
+                    ]
+                });
+
+                const $btns = buttons.container().find('button');
+                document.querySelector('[data-dt-button="excel"]').addEventListener('click', () => $btns.eq(0).click());
+                document.querySelector('[data-dt-button="pdf"]').addEventListener('click', () => $btns.eq(1).click());
             });
         </script>
     @endpush

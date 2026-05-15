@@ -41,6 +41,12 @@ class GradeLevelDataTable extends DataTable
                     'param'        => $gradeLevel
                 ])->render()
             )
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('grade_levels.name', 'ilike', "%{$keyword}%");
+            })
+            ->filterColumn('status', function ($query, $keyword) {
+                $query->where('grade_levels.status', 'ilike', "%{$keyword}%");
+            })
             ->rawColumns(['is_active', 'action'])
             ->setRowId('id');
     }
@@ -99,12 +105,13 @@ class GradeLevelDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('name')->title('Grade Level'),
-            Column::make('is_active')->title('Status'),
+            Column::computed('name')->title('Grade Level')->searchable(true),
+            Column::computed('is_active')->title('Status')->searchable(true),
             Column::make('created_at')->title('Created At'),
             Column::computed('action')
                 ->title('Actions')
                 ->exportable(false)
+                ->searchable(false)
                 ->printable(false)
                 ->width(100)
                 ->addClass('text-center'),

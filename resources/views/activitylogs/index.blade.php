@@ -333,35 +333,32 @@
         {{ $dataTable->scripts(attributes: ['type' => 'module']) }}
 
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                $('#activitylogs-table').on('init.dt', function () {
-                    const table = $('#activitylogs-table').DataTable();
-                    const $length = $('#activitylogs-table_length').detach();
-                    $('#search-export-row').prepend($length);
+            function waitForTable(id, callback) {
+                if (window.LaravelDataTables && window.LaravelDataTables[id]) {
+                    callback(window.LaravelDataTables[id]);
+                } else {
+                    setTimeout(() => waitForTable(id, callback), 50);
+                }
+            }
 
-                    // Wire custom search input
-                    document.getElementById('log-search').addEventListener('input', function () {
-                        table.search(this.value).draw();
-                    });
+            waitForTable('activitylogs-table', function (table) {
+                const $length = $('#activitylogs-table_length').detach();
+                $('#search-export-row').prepend($length);
 
-                    // Export buttons
-                    const buttons = new $.fn.dataTable.Buttons(table, {
-                        buttons: [
-                            {
-                                extend: 'excel',
-                                exportOptions: { columns: ':not(:last-child)' }
-                            },
-                            {
-                                extend: 'pdf',
-                                exportOptions: { columns: ':not(:last-child)' }
-                            }
-                        ]
-                    });
-
-                    const $btns = buttons.container().find('button');
-                    document.querySelector('[data-dt-button="excel"]').addEventListener('click', () => $btns.eq(0).click());
-                    document.querySelector('[data-dt-button="pdf"]').addEventListener('click', () => $btns.eq(1).click());
+                document.getElementById('activitylogs-search').addEventListener('input', function () {
+                    table.search(this.value).draw();
                 });
+
+                const buttons = new $.fn.dataTable.Buttons(table, {
+                    buttons: [
+                        { extend: 'excel', exportOptions: { columns: ':not(:last-child)' } },
+                        { extend: 'pdf', exportOptions: { columns: ':not(:last-child)' } }
+                    ]
+                });
+
+                const $btns = buttons.container().find('button');
+                document.querySelector('[data-dt-button="excel"]').addEventListener('click', () => $btns.eq(0).click());
+                document.querySelector('[data-dt-button="pdf"]').addEventListener('click', () => $btns.eq(1).click());
             });
 
             function showDetails(btn) {
@@ -392,29 +389,29 @@
                         ).join('');
 
                         return `<div style="background:#f8fafc;border-radius:8px;border:1px solid #f1f5f9;padding:12px;margin-bottom:8px;">
-                                        <p style="margin:0 0 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:#94a3b8;">${formattedKey}</p>
-                                        <div style="display:flex;flex-wrap:wrap;gap:6px;">${pills}</div>
-                                    </div>`;
+                            <p style="margin:0 0 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:#94a3b8;">${formattedKey}</p>
+                            <div style="display:flex;flex-wrap:wrap;gap:6px;">${pills}</div>
+                        </div>`;
                     }).join('');
 
                     return `<div style="margin-bottom:12px;">
-                                    <p style="margin:0 0 6px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;">${label}</p>
-                                    ${fields}
-                                </div>`;
+                        <p style="margin:0 0 6px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;">${label}</p>
+                        ${fields}
+                    </div>`;
                 }
 
                 const newSection = renderSection('New values', data.attributes);
                 const oldSection = renderSection('Old values', data.old);
 
                 const placeholder = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;gap:8px;color:#94a3b8;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor" stroke-width="1.5" style="opacity:0.4;">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                            </svg>
-                                            <p style="margin:0;font-size:13px;color:#475569;">No changes recorded</p>
-                                            <p style="margin:0;font-size:12px;color:#94a3b8;">This activity has no attribute data attached.</p>
-                                        </div>`;
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="1.5" style="opacity:0.4;">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                    <p style="margin:0;font-size:13px;color:#475569;">No changes recorded</p>
+                    <p style="margin:0;font-size:12px;color:#94a3b8;">This activity has no attribute data attached.</p>
+                </div>`;
 
                 document.getElementById('logContent').innerHTML = (newSection || oldSection)
                     ? (newSection + oldSection)

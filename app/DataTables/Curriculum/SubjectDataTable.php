@@ -40,6 +40,18 @@ class SubjectDataTable extends DataTable
                     'param'        => $subject,
                 ])->render()
             )
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('subjects.name', 'ilike', "%{$keyword}%");
+            })
+            ->filterColumn('code', function ($query, $keyword) {
+                $query->where('subjects.code', 'ilike', "%{$keyword}%");
+            })
+            ->filterColumn('description', function ($query, $keyword) {
+                $query->where('subjects.description', 'ilike', "%{$keyword}%");
+            })
+            ->filterColumn('is_active', function ($query, $keyword) {
+                $query->where('subjects.is_active', 'ilike', "%{$keyword}%");
+            })
             ->rawColumns(['is_active', 'action'])
             ->setRowId('id');
     }
@@ -66,18 +78,12 @@ class SubjectDataTable extends DataTable
             ->responsive([
                 'details' => [
                     'type'   => 'inline',
-                    'target' => 'td.dtr-control',
-                ],
+                    'target' => 'tr',
+                ]
             ])
-            ->buttons([
-                ['extend' => 'excel', 'exportOptions' => ['columns' => ':not(:last-child)']],
-                ['extend' => 'pdf',   'exportOptions' => ['columns' => ':not(:last-child)']],
-            ])
-            ->layout([
-                'topStart'    => 'length',  // rendered here so JS can detach it
-                'topEnd'      => null,
-                'bottomStart' => 'info',
-                'bottomEnd'   => 'paging',
+            ->setTableAttribute('dom', 'lrtip')
+            ->parameters([
+                'lengthChange' => true,
             ])
             ->columnDefs([
                 ['responsivePriority' => 1, 'targets' => 0],  // Name        — always visible
@@ -86,6 +92,12 @@ class SubjectDataTable extends DataTable
                 ['responsivePriority' => 5, 'targets' => 3],  // Status
                 ['responsivePriority' => 6, 'targets' => 4],  // Created At
                 ['responsivePriority' => 2, 'targets' => 5],  // Action      — always visible
+            ])
+            ->layout([
+                'topStart'    => 'length',
+                'topEnd'      => null,
+                'bottomStart' => 'info',
+                'bottomEnd'   => 'paging',
             ])
             ->orderBy(0, 'asc')
             ->selectStyleSingle()
@@ -100,10 +112,10 @@ class SubjectDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('name')->title('Subject'),
-            Column::make('code')->title('Code'),
-            Column::make('description')->title('Description'),
-            Column::make('is_active')->title('Status'),
+            Column::computed('name')->title('Subject')->searchable(true),
+            Column::computed('code')->title('Code')->searchable(true),
+            Column::computed('description')->title('Description')->searchable(true),
+            Column::computed('is_active')->title('Status')->searchable(true),
             Column::make('created_at')->title('Created At'),
             Column::computed('action')
                 ->exportable(false)

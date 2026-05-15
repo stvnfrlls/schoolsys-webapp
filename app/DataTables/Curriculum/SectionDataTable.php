@@ -40,6 +40,15 @@ class SectionDataTable extends DataTable
                     'param' => $section
                 ])->render()
             )
+            ->filterColumn('grade_level', function ($query, $keyword) {
+                $query->where('grade_levels.name', 'ilike', "%{$keyword}%");
+            })
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->where('sections.name', 'ilike', "%{$keyword}%");
+            })
+            ->filterColumn('status', function ($query, $keyword) {
+                $query->where('sections.status', 'ilike', "%{$keyword}%");
+            })
             ->rawColumns(['is_active', 'action'])
             ->setRowId('id');
     }
@@ -51,9 +60,11 @@ class SectionDataTable extends DataTable
      */
     public function query(Section $model): QueryBuilder
     {
-        return $model->newQuery();
+        return $model->newQuery()
+            ->with(['gradeLevel'])                                          // relation is camelCase
+            ->join('grade_levels', 'grade_levels.id', '=', 'sections.grade_level_id') // ← correct table names
+            ->select('sections.*');                                         // ← was 'subject.*'
     }
-
     /**
      * Optional method if you want to use the html builder.
      */
@@ -99,12 +110,13 @@ class SectionDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('grade_level')->title('Grade Level'),
-            Column::make('name')->title('Section Name'),
-            Column::make('is_active')->title('Status'),
+            Column::computed('grade_level')->title('Grade Level')->searchable(true),
+            Column::computed('name')->title('Section Name')->searchable(true),
+            Column::computed('is_active')->title('Status')->searchable(true),
             Column::make('created_at')->title('Created At'),
             Column::computed('action')
                 ->exportable(false)
+                ->searchable(false)
                 ->printable(false)
                 ->width(100)
                 ->addClass('text-center'),
