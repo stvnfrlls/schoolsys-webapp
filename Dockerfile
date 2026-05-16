@@ -67,6 +67,8 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
     bootstrap/cache \
     && chmod -R 777 storage bootstrap/cache
 
+RUN mkdir -p /.config/psysh && chmod 777 /.config/psysh
+
 EXPOSE 8080
 
 ENTRYPOINT ["/entrypoint.sh"]
