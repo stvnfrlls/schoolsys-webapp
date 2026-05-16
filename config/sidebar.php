@@ -44,13 +44,13 @@ return [
             ],
             [
                 'label' => 'Grades',
-                'route' => 'grades.index',
+                'route' => '#',
                 'permission' => 'view grades',
                 'child' => true,
             ],
             [
                 'label' => 'Attendance',
-                'route' => 'attendance.index',
+                'route' => '#',
                 'permission' => 'view attendance',
                 'child' => true,
             ],

@@ -23,10 +23,6 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        /*
-         * app.blade.php design tokens — keeps the dashboard visually
-         * consistent with the landing page's color system and typography.
-         */
 
         /* ── Base ── */
         body {
@@ -96,21 +92,12 @@
     @stack('styles')
 </head>
 
-{{--
-Light slate body — matches the white/light sections of the landing page
-(stats, role-cards, features). Contrasts cleanly with the dark sidebar.
---}}
 
 <body class="bg-slate-50 antialiased">
 
     <div class="flex h-screen overflow-hidden">
 
         {{-- ===================== SIDEBAR ===================== --}}
-        {{--
-        Unchanged structure; minor visual tweak: sky-500 logo bg
-        and active link glow (via .sidebar-link.active override above)
-        now both reference the same sky/school color system as the landing page.
-        --}}
         <aside id="sidebar" class="flex flex-col w-64 shrink-0 bg-school-800 text-white transition-transform duration-200 ease-in-out
                    fixed inset-y-0 left-0 z-40
                    -translate-x-full md:relative md:translate-x-0">
@@ -144,7 +131,7 @@ Light slate body — matches the white/light sections of the landing page
 
             <nav x-data="{ openGroup: '{{ $activeGroup }}' }" class="flex-1 overflow-y-auto px-3 py-4 space-y-2">
 
-                @foreach(config('sidebar') as $group)
+                @foreach(\App\Services\SidebarService::getMenu() as $group)
                     @if(!empty($group['collapsible']))
                         <div>
                             <button
@@ -164,12 +151,10 @@ Light slate body — matches the white/light sections of the landing page
                     @endif
 
                             @foreach($group['items'] as $item)
-                                @if(!$item['permission'] || auth()->user()->can($item['permission']))
-                                    <a href="{{ $item['route'] != '#' ? route($item['route']) : '#' }}"
-                                        class="sidebar-link {{ !empty($item['child']) ? 'ml-4' : '' }} {{ request()->routeIs(str_replace('.index', '.*', $item['route'])) ? 'active' : '' }}">
-                                        {{ $item['label'] }}
-                                    </a>
-                                @endif
+                                <a href="{{ $item['route'] != '#' ? route($item['route']) : '#' }}"
+                                    class="sidebar-link {{ !empty($item['child']) ? 'ml-4' : '' }} {{ request()->routeIs(str_replace('.index', '.*', $item['route'])) ? 'active' : '' }}">
+                                    {{ $item['label'] }}
+                                </a>
                             @endforeach
 
                             @if(!empty($group['collapsible']))
