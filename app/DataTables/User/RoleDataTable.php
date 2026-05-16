@@ -23,7 +23,9 @@ class RoleDataTable extends DataTable
         $authUser = Auth::user();
 
         return (new EloquentDataTable($query))
-            ->filterColumn('name', fn($query, $keyword) => $query->where('name', 'ilike', "%{$keyword}%"))
+            ->filterColumn('name', function ($query, $keyword) {
+                $query->whereRaw('LOWER(name) LIKE ?', [strtolower("%{$keyword}%")]);
+            })
             ->editColumn("permission_count", fn(Role $role) => $role->permission_count ?? 0)
             ->editColumn("user_count", fn(Role $role) => $role->user_count ?? 0)
             ->editColumn("created_at", fn(Role $role) => $role->created_at->format("M d, Y"))
