@@ -62,6 +62,15 @@ class RolePermissionSeeder extends Seeder
             'create schedules',
             'edit schedules',
             'delete schedules',
+            'view grades',
+            'create grades',
+            'edit grades',
+            'delete grades',
+            'view attendance',
+            'create attendance',
+            'edit attendance',
+            'delete attendance',
+            'manage settings',
         ];
 
         foreach ($permissions as $permission) {

@@ -10,9 +10,18 @@ class SectionSeeder extends Seeder
 {
     public function run(): void
     {
-        $sectionNames = ['Sampaguita', 'Rosal', 'Ilang-Ilang'];
+        $sectionsByGrade = [
+            'Grade 7' => ['Sampaguita', 'Rosal', 'Ilang-Ilang'],
+            'Grade 8' => ['Aurora', 'Benilson', 'Calamansi'],
+            'Grade 9' => ['Dalahon', 'Edelweiss', 'Frangipani'],
+            'Grade 10' => ['Gumamela', 'Heliotrope', 'Ixora'],
+            'Grade 11' => ['Jasmine', 'Kalachoe', 'Lantana'],
+            'Grade 12' => ['Marigold', 'Narcissus', 'Orchid'],
+        ];
 
-        GradeLevel::all()->each(function (GradeLevel $gradeLevel) use ($sectionNames) {
+        GradeLevel::all()->each(function (GradeLevel $gradeLevel) use ($sectionsByGrade) {
+            $sectionNames = $sectionsByGrade[$gradeLevel->name] ?? [];
+
             foreach ($sectionNames as $name) {
                 Section::create([
                     'grade_level_id' => $gradeLevel->id,
