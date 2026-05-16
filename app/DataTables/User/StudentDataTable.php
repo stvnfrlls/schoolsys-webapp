@@ -2,6 +2,8 @@
 
 namespace App\DataTables\User;
 
+use App\Models\Enrollment;
+use App\Models\Schedule;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
@@ -31,7 +33,27 @@ class StudentDataTable extends DataTable
                 fn($query, $keyword) =>
                 $query->where('student_number', 'ilike', "%{$keyword}%")
             )
+            ->filterColumn('section', function ($query, $keyword) {
+                $query->whereHas('currentEnrollment.section', function ($q) use ($keyword) {
+                    $q->where('name', 'ilike', "%{$keyword}%");
+                });
+            })
+            ->filterColumn('grade', function ($query, $keyword) {
+                $query->whereHas('currentEnrollment.section.gradeLevel', function ($q) use ($keyword) {
+                    $q->where('name', 'ilike', "%{$keyword}%");
+                });
+            })
             ->addColumn('full_name', fn(Student $student) => $student->full_name)
+            ->addColumn(
+                'section',
+                fn(Student $student) =>
+                $student->currentEnrollment?->section?->name ?? '—'
+            )
+            ->addColumn(
+                'grade',
+                fn(Student $student) =>
+                $student->currentEnrollment?->section?->gradeLevel?->name ?? '—'
+            )
             ->editColumn('status', fn(Student $student) => view('components.status-badge', [
                 'status' => $student->status,
             ])->render())
@@ -61,7 +83,40 @@ class StudentDataTable extends DataTable
      */
     public function query(Student $model): QueryBuilder
     {
-        return $model->newQuery();
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        // Eager load currentEnrollment → section → gradeLevel to avoid N+1
+        $baseQuery = $model->newQuery()->with('currentEnrollment.section.gradeLevel');
+
+        if ($user->hasRole(['Admin'])) {
+            return $baseQuery;
+        }
+
+        if ($user->hasRole('Faculty')) {
+            /** @var \App\Models\Faculty $faculty */
+            $faculty = $user->faculty()->first();
+
+            $sectionIds = Schedule::where('faculty_id', $faculty->id)
+                ->pluck('section_id')
+                ->unique();
+
+            $studentIds = Enrollment::whereIn('section_id', $sectionIds)
+                ->whereHas('schoolYear', fn($q) => $q->where('is_active', 'active'))
+                ->pluck('student_id')
+                ->unique();
+
+            return $baseQuery->whereIn('id', $studentIds);
+        }
+
+        if ($user->hasRole('Student')) {
+            /** @var \App\Models\Student $student */
+            $student = $user->student()->first();
+
+            return $baseQuery->where('id', $student->id);
+        }
+
+        return $baseQuery->whereRaw('1 = 0');
     }
 
     /**
@@ -87,9 +142,11 @@ class StudentDataTable extends DataTable
                 ['responsivePriority' => 1, 'targets' => 1], // full_name
                 ['responsivePriority' => 2, 'targets' => -1], // action
                 ['responsivePriority' => 3, 'targets' => 2], // student_number
-                ['responsivePriority' => 4, 'targets' => 3], // status
-                ['responsivePriority' => 5, 'targets' => 4], // created_at
-                ['responsivePriority' => 6, 'targets' => 0], // id — hides last
+                ['responsivePriority' => 4, 'targets' => 3], // grade
+                ['responsivePriority' => 5, 'targets' => 4], // section
+                ['responsivePriority' => 6, 'targets' => 5], // status
+                ['responsivePriority' => 7, 'targets' => 6], // created_at
+                ['responsivePriority' => 8, 'targets' => 0], // id — hides last
             ])
             ->layout([
                 'topStart'    => null,
@@ -110,9 +167,10 @@ class StudentDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('id')->title('#')->width(50)->searchable(false),
-            Column::make('full_name')->title('Name'),
             Column::make('student_number')->title('Student No.'),
+            Column::make('full_name')->title('Name'),
+            Column::computed('grade')->title('Grade')->searchable(true)->orderable(false),
+            Column::computed('section')->title('Section')->searchable(true)->orderable(false),
             Column::make('status')->title('Status')->searchable(false)->orderable(false),
             Column::make('created_at')->title('Enrolled')->searchable(true),
             Column::computed('action')->title('Actions')->exportable(false)->printable(false)->searchable(false)->orderable(false),

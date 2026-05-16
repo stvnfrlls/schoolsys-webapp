@@ -123,7 +123,10 @@ class ScheduleDataTable extends DataTable
      */
     public function query(Schedule $model): QueryBuilder
     {
-        return $model->newQuery()
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        $baseQuery = $model->newQuery()
             ->with(['faculty', 'section.gradeLevel', 'subject', 'schoolYear'])
             ->join('faculties', 'faculties.id', '=', 'schedules.faculty_id')
             ->join('sections', 'sections.id', '=', 'schedules.section_id')
@@ -135,6 +138,36 @@ class ScheduleDataTable extends DataTable
                 'subjects.name as subject_name',
                 'school_years.name as school_year_name',
             );
+
+        // ── Admin: see all schedules ──────────────────────────────
+        if ($user->hasRole('Admin')) {
+            return $baseQuery;
+        }
+
+        // ── Faculty: see only their own schedules ─────────────────
+        if ($user->hasRole('Faculty')) {
+            /** @var \App\Models\Faculty $faculty */
+            $faculty = $user->faculty()->first();
+
+            return $baseQuery->where('schedules.faculty_id', $faculty->id);
+        }
+
+        // ── Student: see only schedules of their enrolled section ─
+        if ($user->hasRole('Student')) {
+            /** @var \App\Models\Student $student */
+            $student = $user->student()->first();
+
+            $sectionId = $student->currentEnrollment?->section_id;
+
+            if (!$sectionId) {
+                return $baseQuery->whereRaw('1 = 0');
+            }
+
+            return $baseQuery->where('schedules.section_id', $sectionId);
+        }
+
+        // ── Fallback: show nothing ────────────────────────────────
+        return $baseQuery->whereRaw('1 = 0');
     }
 
     /**

@@ -73,7 +73,18 @@ class UserDataTable extends DataTable
      */
     public function query(User $model): QueryBuilder
     {
-        return $model->newQuery()->with('roles');
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        $baseQuery = $model->newQuery()->with('roles');
+
+        // ── Admin: see all users ──────────────────────────────────
+        if ($user->hasRole('Admin')) {
+            return $baseQuery;
+        }
+
+        // ── Faculty / Student: see only their own account ─────────
+        return $baseQuery->where('id', $user->id);
     }
 
     /**

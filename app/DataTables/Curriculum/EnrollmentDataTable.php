@@ -3,6 +3,7 @@
 namespace App\DataTables\Curriculum;
 
 use App\Models\Enrollment;
+use App\Models\Schedule;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
@@ -78,12 +79,45 @@ class EnrollmentDataTable extends DataTable
      */
     public function query(Enrollment $model): QueryBuilder
     {
-        return $model->newQuery()
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        $baseQuery = $model->newQuery()
             ->with(['student', 'section', 'schoolYear'])
             ->join('students', 'students.id', '=', 'enrollments.student_id')
             ->join('sections', 'sections.id', '=', 'enrollments.section_id')
             ->join('school_years', 'school_years.id', '=', 'enrollments.school_year_id')
             ->select('enrollments.*');
+
+        // ── Admin: show all enrollments ───────────────────────────
+        if ($user->hasRole('Admin')) {
+            return $baseQuery;
+        }
+
+        // ── Faculty: show only enrollments in their sections (active school year) ───
+        if ($user->hasRole('Faculty')) {
+            /** @var \App\Models\Faculty $faculty */
+            $faculty = $user->faculty()->first();
+
+            $sectionIds = Schedule::where('faculty_id', $faculty->id)
+                ->pluck('section_id')
+                ->unique();
+
+            return $baseQuery
+                ->whereIn('enrollments.section_id', $sectionIds)
+                ->whereHas('schoolYear', fn($q) => $q->where('is_active', 'active'));
+        }
+
+        // ── Student: show only their own enrollments ──────────────
+        if ($user->hasRole('Student')) {
+            /** @var \App\Models\Student $student */
+            $student = $user->student()->first();
+
+            return $baseQuery->where('enrollments.student_id', $student->id);
+        }
+
+        // ── Fallback: show nothing ────────────────────────────────
+        return $baseQuery->whereRaw('1 = 0');
     }
 
     public function html(): HtmlBuilder

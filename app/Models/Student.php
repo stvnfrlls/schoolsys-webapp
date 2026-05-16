@@ -72,6 +72,6 @@ class Student extends Model
     public function currentEnrollment(): HasOne
     {
         return $this->hasOne(Enrollment::class)
-            ->whereHas('schoolYear', fn($q) => $q->where('is_active', true));
+            ->whereHas('schoolYear', fn($q) => $q->where('is_active', 'active'));
     }
 }
