@@ -4,6 +4,7 @@ namespace App\DataTables\User;
 
 use Spatie\Permission\Models\Role;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -18,6 +19,9 @@ class RoleDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->filterColumn('name', fn($query, $keyword) => $query->where('name', 'ilike', "%{$keyword}%"))
             ->editColumn("permission_count", fn(Role $role) => $role->permission_count ?? 0)
@@ -27,9 +31,9 @@ class RoleDataTable extends DataTable
                 'action',
                 fn(Role $role) =>
                 view('components.actions', [
-                    'canView'      => true,
-                    'canEdit'      => true,
-                    'canDelete'    => true,
+                    'canView'      => $authUser->hasPermissionTo('view roles'),
+                    'canEdit'      => $authUser->hasPermissionTo('edit roles'),
+                    'canDelete'    => $authUser->hasPermissionTo('delete roles'),
                     'routeKeyName' => 'roles.',
                     'param'        => $role
                 ])->render()

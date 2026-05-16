@@ -6,6 +6,7 @@ use App\Models\Enrollment;
 use App\Models\Schedule;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -20,6 +21,9 @@ class StudentDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->filterColumn('full_name', function ($query, $keyword) {
                 $query->where(function ($q) use ($keyword) {
@@ -65,9 +69,9 @@ class StudentDataTable extends DataTable
                 'action',
                 fn(Student $student) =>
                 view('components.actions', [
-                    'canView'      => true,
-                    'canEdit'      => true,
-                    'canDelete'    => true,
+                    'canView'      => $authUser->hasPermissionTo('view students'),
+                    'canEdit'      => $authUser->hasPermissionTo('edit students'),
+                    'canDelete'    => $authUser->hasPermissionTo('delete students'),
                     'routeKeyName' => 'students.',
                     'param'        => $student,
                 ])->render()
@@ -84,7 +88,7 @@ class StudentDataTable extends DataTable
     public function query(Student $model): QueryBuilder
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Eager load currentEnrollment → section → gradeLevel to avoid N+1
         $baseQuery = $model->newQuery()->with('currentEnrollment.section.gradeLevel');

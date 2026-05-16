@@ -4,6 +4,7 @@ namespace App\DataTables\Curriculum;
 
 use App\Models\Schedule;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -19,6 +20,9 @@ class ScheduleDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->addColumn(
                 'faculty',
@@ -62,9 +66,9 @@ class ScheduleDataTable extends DataTable
                 'action',
                 fn(Schedule $schedule) =>
                 view('components.actions', [
-                    'canView'      => true,
-                    'canEdit'      => true,
-                    'canDelete'    => true,
+                    'canView'      => $authUser->hasPermissionTo('view schedules'),
+                    'canEdit'      => $authUser->hasPermissionTo('edit schedules'),
+                    'canDelete'    => $authUser->hasPermissionTo('delete schedules'),
                     'routeKeyName' => 'schedules.',
                     'param'        => $schedule,
                 ])->render()
@@ -124,7 +128,7 @@ class ScheduleDataTable extends DataTable
     public function query(Schedule $model): QueryBuilder
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         $baseQuery = $model->newQuery()
             ->with(['faculty', 'section.gradeLevel', 'subject', 'schoolYear'])

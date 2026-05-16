@@ -4,6 +4,7 @@ namespace App\DataTables\User;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -18,6 +19,9 @@ class UserDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->addColumn('name', fn(User $user) => $user->name)
             ->addColumn('email', fn(User $user) => $user->email)
@@ -39,9 +43,9 @@ class UserDataTable extends DataTable
                 'action',
                 fn(User $user) =>
                 view('components.actions', [
-                    'canView'      => true,
-                    'canEdit'      => true,
-                    'canDelete'    => true,
+                    'canView'      => $authUser->hasPermissionTo('view users'),
+                    'canEdit'      => $authUser->hasPermissionTo('edit users'),
+                    'canDelete'    => $authUser->hasPermissionTo('delete users'),
                     'routeKeyName' => 'users.',
                     'param'        => $user
                 ])->render()
@@ -74,7 +78,7 @@ class UserDataTable extends DataTable
     public function query(User $model): QueryBuilder
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         $baseQuery = $model->newQuery()->with('roles');
 

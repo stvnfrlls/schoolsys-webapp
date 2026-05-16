@@ -4,6 +4,7 @@ namespace App\DataTables\Curriculum;
 
 use App\Models\SubjectPerLevel;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -18,6 +19,9 @@ class SubjectPerLevelDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->addColumn('gradelevel_name', fn(SubjectPerLevel $subjectPerLevel) => $subjectPerLevel->gradelevel_name)
             ->addColumn('subject_name', fn(SubjectPerLevel $subjectPerLevel) => $subjectPerLevel->subject_name)
@@ -40,9 +44,9 @@ class SubjectPerLevelDataTable extends DataTable
             ->addColumn(
                 'action',
                 fn(SubjectPerLevel $subjectPerLevel) => view('components.actions', [
-                    'canView'      => true,
-                    'canEdit'      => true,
-                    'canDelete'    => true,
+                    'canView'      => $authUser->hasPermissionTo('view subject per level'),
+                    'canEdit'      => $authUser->hasPermissionTo('edit subject per level'),
+                    'canDelete'    => $authUser->hasPermissionTo('delete subject per level'),
                     'routeKeyName' => 'subjectperlevel.',
                     'param'        => $subjectPerLevel,
                 ])->render()

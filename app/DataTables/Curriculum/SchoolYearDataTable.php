@@ -4,6 +4,7 @@ namespace App\DataTables\Curriculum;
 
 use App\Models\SchoolYear;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -18,6 +19,9 @@ class SchoolYearDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->addColumn('name', fn(SchoolYear $schoolyear) => $schoolyear->name)
             ->filterColumn('name', function ($query, $keyword) {
@@ -56,9 +60,9 @@ class SchoolYearDataTable extends DataTable
                 'action',
                 fn(SchoolYear $schoolyear) =>
                 view('components.actions', [
-                    'canView'      => true,
-                    'canEdit'      => true,
-                    'canDelete'    => true,
+                    'canView'      => $authUser->hasPermissionTo('view school years'),
+                    'canEdit'      => $authUser->hasPermissionTo('edit school years'),
+                    'canDelete'    => $authUser->hasPermissionTo('delete school years'),
                     'routeKeyName' => 'schoolyears.',
                     'param'        => $schoolyear
                 ])->render()

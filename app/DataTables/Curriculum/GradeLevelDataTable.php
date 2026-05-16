@@ -4,6 +4,7 @@ namespace App\DataTables\Curriculum;
 
 use App\Models\GradeLevel;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -18,6 +19,9 @@ class GradeLevelDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->addColumn('name', fn(GradeLevel $gradeLevel) => $gradeLevel->name)
             ->addColumn(
@@ -34,9 +38,9 @@ class GradeLevelDataTable extends DataTable
                 'action',
                 fn(GradeLevel $gradeLevel) =>
                 view('components.actions', [
-                    'canView'      => true,
-                    'canEdit'      => true,
-                    'canDelete'    => true,
+                    'canView'      => $authUser->hasPermissionTo('view grade levels'),
+                    'canEdit'      => $authUser->hasPermissionTo('edit grade levels'),
+                    'canDelete'    => $authUser->hasPermissionTo('delete grade levels'),
                     'routeKeyName' => 'gradelevels.',
                     'param'        => $gradeLevel
                 ])->render()

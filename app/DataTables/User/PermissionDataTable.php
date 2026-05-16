@@ -4,6 +4,7 @@ namespace App\DataTables\User;
 
 use Spatie\Permission\Models\Permission;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -18,6 +19,9 @@ class PermissionDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->editColumn(
                 'created_at',
@@ -27,9 +31,9 @@ class PermissionDataTable extends DataTable
                 'action',
                 fn(Permission $permission) =>
                 view('components.actions', [
-                    'canView' => true,
-                    'canEdit' => true,
-                    'canDelete' => true,
+                    'canView' => $authUser->hasPermissionTo('view permissions'),
+                    'canEdit' => $authUser->hasPermissionTo('edit permissions'),
+                    'canDelete' => $authUser->hasPermissionTo('delete permissions'),
                     'routeKeyName' => 'permissions.',
                     'param' => $permission
                 ])->render()

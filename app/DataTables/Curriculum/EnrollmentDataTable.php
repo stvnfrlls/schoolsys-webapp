@@ -9,6 +9,7 @@ use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Services\DataTable;
+use Illuminate\Support\Facades\Auth;
 
 class EnrollmentDataTable extends DataTable
 {
@@ -19,6 +20,9 @@ class EnrollmentDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->addColumn(
                 'student',
@@ -46,9 +50,9 @@ class EnrollmentDataTable extends DataTable
                 'action',
                 fn(Enrollment $enrollment) =>
                 view('components.actions', [
-                    'canView'      => true,
-                    'canEdit'      => true,
-                    'canDelete'    => true,
+                    'canView'      => $authUser->hasPermissionTo('view enrollments'),
+                    'canEdit'      => $authUser->hasPermissionTo('edit enrollments'),
+                    'canDelete'    => $authUser->hasPermissionTo('delete enrollments'),
                     'routeKeyName' => 'enrollments.',
                     'param'        => $enrollment
                 ])->render()
@@ -80,7 +84,7 @@ class EnrollmentDataTable extends DataTable
     public function query(Enrollment $model): QueryBuilder
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         $baseQuery = $model->newQuery()
             ->with(['student', 'section', 'schoolYear'])
@@ -99,7 +103,7 @@ class EnrollmentDataTable extends DataTable
             /** @var \App\Models\Faculty $faculty */
             $faculty = $user->faculty()->first();
 
-            $sectionIds = Schedule::where('faculty_id', $faculty->id)
+            $sectionIds = Schedule::where('faculty_id', $faculty->getKey())
                 ->pluck('section_id')
                 ->unique();
 
@@ -113,7 +117,7 @@ class EnrollmentDataTable extends DataTable
             /** @var \App\Models\Student $student */
             $student = $user->student()->first();
 
-            return $baseQuery->where('enrollments.student_id', $student->id);
+            return $baseQuery->where('enrollments.student_id', $student->getKey());
         }
 
         // ── Fallback: show nothing ────────────────────────────────

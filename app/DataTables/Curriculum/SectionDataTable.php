@@ -4,6 +4,7 @@ namespace App\DataTables\Curriculum;
 
 use App\Models\Section;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -18,6 +19,9 @@ class SectionDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->addColumn('grade_level', fn(Section $section) => $section->gradeLevel->name)
             ->addColumn('name', fn(Section $section) => $section->name)
@@ -33,9 +37,9 @@ class SectionDataTable extends DataTable
                 'action',
                 fn(Section $section) =>
                 view('components.actions', [
-                    'canView' => true,
-                    'canEdit' => true,
-                    'canDelete' => true,
+                    'canView' => $authUser->hasPermissionTo('view sections'),
+                    'canEdit' => $authUser->hasPermissionTo('edit sections'),
+                    'canDelete' => $authUser->hasPermissionTo('delete sections'),
                     'routeKeyName' => 'sections.',
                     'param' => $section
                 ])->render()

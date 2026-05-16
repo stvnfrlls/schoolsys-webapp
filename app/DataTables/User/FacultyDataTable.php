@@ -4,6 +4,7 @@ namespace App\DataTables\User;
 
 use App\Models\Faculty;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -18,6 +19,9 @@ class FacultyDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->filterColumn('full_name', function ($query, $keyword) {
                 $query->where(function ($q) use ($keyword) {
@@ -43,9 +47,9 @@ class FacultyDataTable extends DataTable
                 'action',
                 fn(Faculty $faculty) =>
                 view('components.actions', [
-                    'canView'      => true,
-                    'canEdit'      => true,
-                    'canDelete'    => true,
+                    'canView'      => $authUser->hasPermissionTo('view faculty'),
+                    'canEdit'      => $authUser->hasPermissionTo('edit faculty'),
+                    'canDelete'    => $authUser->hasPermissionTo('delete faculty'),
                     'routeKeyName' => 'faculty.',
                     'param'        => $faculty,
                 ])->render()

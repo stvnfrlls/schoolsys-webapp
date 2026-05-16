@@ -4,6 +4,7 @@ namespace App\DataTables\Curriculum;
 
 use App\Models\Subject;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Column;
@@ -18,6 +19,9 @@ class SubjectDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+
         return (new EloquentDataTable($query))
             ->addColumn('name', fn(Subject $subject) => $subject->name)
             ->addColumn('code', fn(Subject $subject) => $subject->code)
@@ -33,9 +37,9 @@ class SubjectDataTable extends DataTable
             ->addColumn(
                 'action',
                 fn(Subject $subject) => view('components.actions', [
-                    'canView'      => true,
-                    'canEdit'      => true,
-                    'canDelete'    => true,
+                    'canView'      => $authUser->hasPermissionTo('view subjects'),
+                    'canEdit'      => $authUser->hasPermissionTo('edit subjects'),
+                    'canDelete'    => $authUser->hasPermissionTo('delete subjects'),
                     'routeKeyName' => 'subjects.',
                     'param'        => $subject,
                 ])->render()
