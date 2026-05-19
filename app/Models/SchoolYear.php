@@ -34,6 +34,11 @@ class SchoolYear extends Model
         return $this->hasMany(Enrollment::class);
     }
 
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class);
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', 'active');

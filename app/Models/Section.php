@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -26,7 +27,7 @@ class Section extends Model
         'is_active'
     ];
 
-    public function gradeLevel()
+    public function gradeLevel(): BelongsTo
     {
         return $this->belongsTo(GradeLevel::class);
     }
@@ -34,5 +35,10 @@ class Section extends Model
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class);
     }
 }
