@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Curriculum\AttendanceController;
 use App\Http\Controllers\Curriculum\EnrollmentController;
 use App\Http\Controllers\User\ActivityLogController;
 use App\Http\Controllers\User\PermissionController;
@@ -44,6 +45,14 @@ Route::middleware('auth')->group(function () {
     Route::get('schedules/timetable', [ScheduleController::class, 'timetable'])
         ->name('schedules.timetable');
     Route::resource('schedules', ScheduleController::class);
+
+    Route::prefix('attendance')->name('attendance.')->group(function () {
+        Route::get('load-schedules', [AttendanceController::class, 'loadSchedules'])->name('load-schedules');
+        Route::get('take',           [AttendanceController::class, 'take'])->name('take');
+        Route::get('summary',        [AttendanceController::class, 'summary'])->name('summary');
+    });
+
+    Route::resource('attendance', AttendanceController::class)->except(['create', 'show']);
 });
 
 require __DIR__ . '/auth.php';

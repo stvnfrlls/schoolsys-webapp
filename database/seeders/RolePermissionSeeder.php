@@ -67,6 +67,7 @@ class RolePermissionSeeder extends Seeder
             'edit grades',
             'delete grades',
             'view attendance',
+            'view attendance summary',
             'create attendance',
             'edit attendance',
             'delete attendance',
@@ -89,10 +90,16 @@ class RolePermissionSeeder extends Seeder
                 'view enrollments',
                 'view schedules',
                 'view school years',
+                'view attendance',
+                'view attendance summary',
+                'create attendance',
+                'edit attendance',
             ],
             'Student' => [
                 'view schedules',
                 'view enrollments',
+                'view attendance',
+                'view attendance summary',
             ],
         ];
 

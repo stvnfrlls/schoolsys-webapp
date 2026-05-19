@@ -50,7 +50,7 @@ return [
             ],
             [
                 'label' => 'Attendance',
-                'route' => '#',
+                'route' => 'attendance.index',
                 'permission' => 'view attendance',
                 'child' => true,
             ],

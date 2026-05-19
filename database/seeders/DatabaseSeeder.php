@@ -28,10 +28,7 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        if (! App::isProduction()) {
-            $this->command->warn('Seeder aborted: not running in production environment.');
-            return;
-        }
+       
 
         foreach ($this->seeders as $seeder => $table) {
             if (DB::table($table)->exists()) {
